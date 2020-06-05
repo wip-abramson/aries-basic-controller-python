@@ -7,6 +7,8 @@ from aiohttp import (
     ClientTimeout,
 )
 
+import asyncio
+
 from .connections_controller import ConnectionsController
 
 
