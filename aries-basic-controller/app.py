@@ -1,43 +1,28 @@
 
-from aiohttp import (
-    web,
-    ClientSession,
-    ClientRequest,
-    ClientResponse,
-    ClientError,
-    ClientTimeout,
-)
 
+import os
 import asyncio
 
-from connections_controller import ConnectionsController
+from .aries_controller import AriesAgentController
 
-class AriesAgentController:
 
-    def __init__(self, webhook_port: str, webhook_base, connections: bool, admin_base: str):
+async def start_agent():
+    aries = AriesAgentController("443", "0.0.0.0", True, "https://demo1.myid.africa")
+    connections = await aries.connections_controller.get_connections()
+    print(connections)
+    for connection in connections:
+        print(connection)
 
-        self.app = web.Application()
-        self.webhook_site = None
-        self.admin_base = admin_base
-        self.webhook_port = webhook_port
-        self.connections_controller = None
-        if connections:
-            self.connections_controller = ConnectionsController(self.app, webhook_base, admin_base)
+    invite = await aries.connections_controller.create_invitation(alias="Will")
+    print("Invite", invite)
+    await aries.terminate()
 
-    async def listen_webhooks(self):
-        runner = web.AppRunner(self.app)
-        await runner.setup()
-        self.webhook_site = web.TCPSite(runner, "0.0.0.0", self.webhook_port)
-        await self.webhook_site.start()
 
-    async def terminate(self):
-        loop = asyncio.get_event_loop()
-        if self.proc:
-            await loop.run_in_executor(None, self._terminate)
-        await self.client_session.close()
-        if self.webhook_site:
-            await self.webhook_site.stop()
+if __name__ == "__main__":
+    # aries.listen_webhooks()
+    try:
+        asyncio.get_event_loop().run_until_complete(start_agent())
+    except KeyboardInterrupt:
+        os._exit(1)
 
-aries = AriesAgentController("443", "0.0.0.0", True, "https://demo1.myid.africa")
-aries.listen_webhooks()
-aries.terminate()
+    asyncio.sleep(100)
