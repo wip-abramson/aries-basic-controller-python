@@ -12,8 +12,9 @@ import logging
 
 import json
 
-EVENT_LOGGER = logging.getLogger("event")
+from utils import log_msg
 
+EVENT_LOGGER = logging.getLogger("event")
 
 class repr_json:
     def __init__(self, val):
@@ -33,6 +34,26 @@ class BaseController:
         self.webhook_base = webhook_base
         self.client_session = client_session
         self.webhook_site = None
+        self.color = None
+        self.prefix = None
+
+    def log(self, *msg, **kwargs):
+        self.handle_output(*msg, **kwargs)
+
+    @property
+    def prefix_str(self):
+        if self.prefix:
+            return f"{self.prefix:10s} |"
+
+    def handle_output(self, *output, source: str = None, **kwargs):
+        end = "" if source else "\n"
+        if source == "stderr":
+            color = "fg:ansired"
+        elif not source:
+            color = self.color or "fg:ansiblue"
+        else:
+            color = None
+        log_msg(*output, color=color, prefix=self.prefix_str, end=end, **kwargs)
 
 
     async def admin_request(

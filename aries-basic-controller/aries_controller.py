@@ -9,7 +9,7 @@ from aiohttp import (
 
 import asyncio
 
-from .connections_controller import ConnectionsController
+from connections_controller import ConnectionsController
 
 
 class AriesAgentController:
