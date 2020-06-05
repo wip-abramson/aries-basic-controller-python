@@ -1,4 +1,4 @@
-from .base_controller import BaseController
+from base_controller import BaseController
 
 from aiohttp import (
     web,
@@ -14,10 +14,10 @@ logger = logging.getLogger(__name__)
 
 class ConnectionsController(BaseController):
 
-    def __init__(self, web_app, webhook_base: str):
-        super().__init__(web_app, webhook_base)
+    def __init__(self, web_app, webhook_base: str, admin_base: str):
+        super().__init__(web_app, webhook_base, admin_base)
         self.connections_hook = self.webhook_base + "/topic/connections/"
-        self.web_app.add_routes([web.post(self.connections_hook, self.connections_hook)])
+        #self.web_app.add_routes([web.post(self.connections_hook, self.connections_hook)])
 
     async def connection_hook(self, request: ClientRequest):
         payload = await request.json()
