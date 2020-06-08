@@ -60,3 +60,7 @@ class ConnectionsController(BaseController):
     async def remove_connection(self, connection_id):
         response = await self.admin_POST(f"/connections/{connection_id}")
         return response
+
+    async def send_message(self, connection_id, msg):
+        response = await self.admin_POST(f"/connections/{connection_id}/send-message",{"content": msg})
+        return response

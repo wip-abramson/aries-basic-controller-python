@@ -9,7 +9,7 @@ from aiohttp import (
 
 import asyncio
 
-from .connections_controller import ConnectionsController
+from connections_controller import ConnectionsController
 
 
 class AriesAgentController:
@@ -24,6 +24,7 @@ class AriesAgentController:
         self.client_session: ClientSession = ClientSession()
         if connections:
             self.connections_controller = ConnectionsController(self.app, webhook_base, admin_base, self.client_session)
+        self.proc = None
 
     async def listen_webhooks(self):
         runner = web.AppRunner(self.app)

@@ -1,10 +1,7 @@
-
-
 import os
 import asyncio
 
-from .aries_controller import AriesAgentController
-
+from aries_controller import AriesAgentController
 
 async def start_agent():
     aries = AriesAgentController("443", "0.0.0.0", True, "https://demo1.myid.africa")
@@ -16,7 +13,6 @@ async def start_agent():
     invite = await aries.connections_controller.create_invitation(alias="Will")
     print("Invite", invite)
     await aries.terminate()
-
 
 if __name__ == "__main__":
     # aries.listen_webhooks()
