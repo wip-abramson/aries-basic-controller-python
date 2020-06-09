@@ -1,5 +1,7 @@
 from .base_controller import BaseController
 
+from pubsub import pub
+
 from aiohttp import (
     web,
     ClientSession,
@@ -17,14 +19,16 @@ class ConnectionsController(BaseController):
     def __init__(self, web_app, webhook_base: str, admin_base: str, client_session: ClientSession):
         super().__init__(web_app, webhook_base, admin_base, client_session)
         self.connections_hook = self.webhook_base + "/topic/connections/"
-        #self.web_app.add_routes([web.post(self.connections_hook, self.connections_hook)])
+        self.web_app.add_routes([web.post(self.connections_hook, self.handle_connections_hook)])
 
-    async def connection_hook(self, request: ClientRequest):
+    async def handle_connections_hook(self, request: ClientRequest):
         payload = await request.json()
         print(payload)
 
         connection_id = payload['connection_id']
         state = payload['state']
+
+        pub.sendMessage("connections", payload)
 
         ### Throw some event ...
         return web.Response(status=200)

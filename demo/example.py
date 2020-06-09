@@ -4,7 +4,7 @@ import asyncio
 from aries_basic_controller.aries_controller import AriesAgentController
 
 async def start_agent():
-    aries = AriesAgentController("443", "0.0.0.0", True, "https://demo1.myid.africa")
+    aries = AriesAgentController("https://demo1.myid.africa", 443, "/", True, "https://demo1.myid.africa")
     connections = await aries.connections_controller.get_connections()
     print(connections)
     for connection in connections:
@@ -21,4 +21,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         os._exit(1)
 
-    await asyncio.sleep(100)
