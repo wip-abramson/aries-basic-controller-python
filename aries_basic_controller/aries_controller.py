@@ -30,6 +30,9 @@ class AriesAgentController:
     async def register_connections_listener(self, listener):
         pub.subscribe(listener, "connections")
 
+    async def register_messages_listener(self, listener):
+        pub.subscribe(listener, "basicmessages")
+
     async def listen_webhooks(self):
         runner = web.AppRunner(self.app)
         await runner.setup()

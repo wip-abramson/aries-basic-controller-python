@@ -19,7 +19,11 @@ class ConnectionsController(BaseController):
     def __init__(self, web_app, webhook_base: str, admin_base: str, client_session: ClientSession):
         super().__init__(web_app, webhook_base, admin_base, client_session)
         self.connections_hook = self.webhook_base + "/topic/connections/"
-        self.web_app.add_routes([web.post(self.connections_hook, self.handle_connections_hook)])
+
+        ## TODO is this basic message hook correct
+        self.basic_message_hook = self.webhook_base + "/topic/basicmessages/"
+        self.web_app.add_routes([web.post(self.connections_hook, self.handle_connections_hook),
+                                 web.post(self.basic_message_hook, self.handle_messages_hook)])
 
     async def handle_connections_hook(self, request: ClientRequest):
         payload = await request.json()
@@ -29,6 +33,18 @@ class ConnectionsController(BaseController):
         state = payload['state']
 
         pub.sendMessage("connections", payload)
+
+        ### Throw some event ...
+        return web.Response(status=200)
+
+    async def handle_messages_hook(self, request: ClientRequest):
+        payload = await request.json()
+        print(payload)
+
+        connection_id = payload['connection_id']
+        state = payload['state']
+
+        pub.sendMessage("basicmessages", payload)
 
         ### Throw some event ...
         return web.Response(status=200)

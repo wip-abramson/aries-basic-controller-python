@@ -10,6 +10,8 @@ async def start_agent():
     for connection in connections:
         print(connection)
 
+
+
     invite = await aries.connections_controller.create_invitation(alias="Will")
     print("Invite", invite)
     await aries.terminate()
