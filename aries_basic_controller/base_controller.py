@@ -12,7 +12,7 @@ import logging
 
 import json
 
-from utils import log_msg
+from .utils import log_msg
 
 EVENT_LOGGER = logging.getLogger("event")
 

@@ -9,7 +9,7 @@ from aiohttp import (
 
 import asyncio
 
-from connections_controller import ConnectionsController
+from .connections_controller import ConnectionsController
 
 
 class AriesAgentController:
@@ -33,9 +33,10 @@ class AriesAgentController:
         await self.webhook_site.start()
 
     async def terminate(self):
-        loop = asyncio.get_event_loop()
-        if self.proc:
-            await loop.run_in_executor(None, self._terminate)
+        # loop = asyncio.get_event_loop()
+        # if self.proc:
+        #     await loop.run_in_executor(None, self._terminate)
         await self.client_session.close()
         if self.webhook_site:
             await self.webhook_site.stop()
+

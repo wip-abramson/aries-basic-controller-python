@@ -1,7 +1,7 @@
 import os
 import asyncio
 
-from aries_controller import AriesAgentController
+from aries_basic_controller.aries_controller import AriesAgentController
 
 async def start_agent():
     aries = AriesAgentController("443", "0.0.0.0", True, "https://demo1.myid.africa")
@@ -21,4 +21,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         os._exit(1)
 
-    asyncio.sleep(100)
+    await asyncio.sleep(100)
