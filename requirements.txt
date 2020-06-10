@@ -3,3 +3,4 @@ asyncio
 prompt_toolkit
 pygments
 PyPubSub
+python-dotenv
