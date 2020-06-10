@@ -7,6 +7,9 @@ ADD README.md .
 
 RUN pip3 install --no-cache-dir -e .
 
+
+#ADD demo/.env .
 ADD demo/example.py .
 EXPOSE 443
+
 CMD [ "python", "./example.py" ]

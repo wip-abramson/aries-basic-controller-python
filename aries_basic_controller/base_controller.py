@@ -28,12 +28,9 @@ class repr_json:
 
 class BaseController:
 
-    def __init__(self, web_app: str, webhook_base: str, admin_base: str, client_session):
-        self.web_app = web_app
-        self.admin_url = admin_base
-        self.webhook_base = webhook_base
+    def __init__(self, admin_url: str, client_session):
+        self.admin_url = admin_url
         self.client_session = client_session
-        self.webhook_site = None
         self.color = None
         self.prefix = None
 
