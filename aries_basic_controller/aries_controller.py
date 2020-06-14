@@ -9,6 +9,7 @@ from aiohttp import (
 from pubsub import pub
 import asyncio
 
+from .utils import log_msg
 from .connections_controller import ConnectionsController
 
 
@@ -32,6 +33,8 @@ class AriesAgentController:
 
     def register_listeners(self, listeners):
         for listener in listeners:
+            log_msg(listener["handler"])
+            log_msg(listener["topic"])
             pub.subscribe(listener["handler"], listener["topic"])
 
     async def listen_webhooks(self):
@@ -49,7 +52,9 @@ class AriesAgentController:
         return web.Response(status=200)
 
     async def handle_webhook(self, topic, payload):
-        pub.sendMessage(topic, payload)
+        log_msg(f"Hanlde {topic}")
+        log_msg(payload)
+        pub.sendMessage(topic, payload=payload)
         return web.Response(status=200)
 
     async def terminate(self):

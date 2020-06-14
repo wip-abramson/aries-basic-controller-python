@@ -29,24 +29,23 @@ async def start_agent():
 
     researcher_agent_controller = AriesAgentController(webhook_host=RESEARCHER_WEBHOOK_HOST, webhook_port=RESEARCHER_WEBHOOK_PORT,
                                                webhook_base=RESEARCHER_WEBHOOK_BASE, admin_url=RESEARCHER_ADMIN_URL, connections=True)
+
     def connections_hook(payload):
         print(payload)
+        print("THE CONNECTIONS HOOK WORKS")
 
-    data_connections_handler = connections_hook
 
     await researcher_agent_controller.listen_webhooks()
 
+    await data_agent_controller.listen_webhooks()
+
     data_connection_listener = {
-        "handler": data_connections_handler,
+        "handler": connections_hook,
         "topic": "connections"
     }
 
     researcher_agent_controller.register_listeners([data_connection_listener])
 
-    connections = await data_agent_controller.connections_controller.get_connections()
-    print(connections)
-    for connection in connections:
-        print(connection)
 
     invite = await data_agent_controller.connections_controller.create_invitation(alias="Will")
     print("Invite", invite)
@@ -56,11 +55,17 @@ async def start_agent():
 
     accepted = await researcher_agent_controller.connections_controller.accept_invitation(response["connection_id"])
 
+    print("Invite Accepted")
     print(accepted)
 
-    success = await data_agent_controller.connections_controller.accept_request(invite["connection_id"])
+    connections = await data_agent_controller.connections_controller.get_connections()
+    print("DATA AGENT CONNECTIONS")
+    for connection in connections:
+        print(connection)
 
-    print(success)
+    # success = await data_agent_controller.connections_controller.accept_request(invite["connection_id"])
+
+    # print(success)
     time.sleep(20)
     await data_agent_controller.terminate()
     await researcher_agent_controller.terminate()
