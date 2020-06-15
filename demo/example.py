@@ -164,10 +164,10 @@ async def start_agent():
 
 
 
-    # print(success)
+    print("SUCCESS")
     time.sleep(2)
-    # await data_agent_controller.terminate()
-    # await researcher_agent_controller.terminate()
+    await data_agent_controller.terminate()
+    await researcher_agent_controller.terminate()
 
 
 if __name__ == "__main__":
