@@ -6,7 +6,7 @@ from timeit import default_timer
 
 import prompt_toolkit
 from prompt_toolkit.application import run_in_terminal
-#from prompt_toolkit.eventloop.defaults import use_asyncio_event_loop
+from prompt_toolkit.eventloop.defaults import use_asyncio_event_loop
 from prompt_toolkit.patch_stdout import patch_stdout
 from prompt_toolkit.shortcuts import ProgressBar
 
@@ -18,7 +18,6 @@ from prompt_toolkit.formatted_text import FormattedText, PygmentsTokens
 
 
 COLORIZE = bool(os.getenv("COLORIZE", True))
-
 
 class PrefixFilter(Filter):
     def __init__(self, **options):

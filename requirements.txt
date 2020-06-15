@@ -1,6 +1,6 @@
 aiohttp~=3.6.2
 asyncio
-prompt_toolkit
+prompt-toolkit<3.0.0
 pygments
 PyPubSub
 python-dotenv

@@ -6,11 +6,6 @@ ADD setup.py .
 ADD README.md .
 ADD demo/example.py .
 
-
 RUN pip3 install --no-cache-dir -e .
-
-
-
-
 
 CMD [ "python", "./example.py" ]

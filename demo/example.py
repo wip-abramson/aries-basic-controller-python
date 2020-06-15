@@ -94,7 +94,7 @@ async def start_agent():
 
 
     # print(success)
-    time.sleep(200)
+    time.sleep(500)
     await data_agent_controller.terminate()
     await researcher_agent_controller.terminate()
 
