@@ -162,7 +162,13 @@ async def start_agent():
     print("BASIC MESSAGE - DATA -> RESEARCH")
     print(message)
 
-
+    for i in range(1, 10):
+        message = await researcher_agent_controller.connections_controller.send_message(researcher_id,
+                                                                                        "ping")
+        print("BASIC MESSAGE - RESEARCH -> DATA")
+        message = await data_agent_controller.connections_controller.send_message(data_connection_id,
+                                                                                  "pong")
+        print("BASIC MESSAGE - DATA -> RESEARCH")
 
     print("SUCCESS")
     time.sleep(2)
