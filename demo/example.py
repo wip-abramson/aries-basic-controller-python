@@ -31,28 +31,35 @@ async def start_agent():
                                                webhook_base=RESEARCHER_WEBHOOK_BASE, admin_url=RESEARCHER_ADMIN_URL, connections=True)
 
     data_connection_id = None
-    data_id_ready = asyncio.Future()
+    data_id_request = asyncio.Future()
+    data_id_active = asyncio.Future()
 
     def data_connections_hook(payload):
         connection_id = payload["connection_id"]
-        print("Handle data connections ", connection_id)
+        print("Handle data connections ", payload["state"], connection_id, data_connection_id)
         print(payload)
         if connection_id == data_connection_id:
             print("ID Equal")
             if payload["state"] == "request":
                 print("Connection Request")
-                asyncio.get_event_loop().run_until_complete(data_agent_controller.connections_controller.accept_request(connection_id))
-
-            if payload["state"] == "active" and not data_id_ready.done():
+                data_id_request.set_result(True)
+            if payload["state"] == "active" and not data_id_active.done():
                 print("Connection Active", connection_id)
-                data_id_ready.set_result(True)
+                data_id_active.set_result(True)
 
-    async def detect_connection():
-        await data_id_ready
+    def research_connections_hook(payload):
+        connection_id = payload["connection_id"]
+        print("Handle research connections ", payload["state"], connection_id)
+
+    async def detect_connection_active():
+        await data_id_active
+
+    async def detect_connection_request():
+        await data_id_request
 
     @property
     def connection_ready():
-        return data_id_ready.done() and data_id_ready.result()
+        return data_id_active.done() and data_id_active.result()
 
 
 
@@ -69,8 +76,13 @@ async def start_agent():
         "topic": "connections"
     }
 
-    data_agent_controller.register_listeners([data_connection_listener])
+    research_connection_listener = {
+        "handler": research_connections_hook,
+        "topic": "connections"
+    }
 
+    data_agent_controller.register_listeners([data_connection_listener])
+    researcher_agent_controller.register_listeners([research_connection_listener])
 
     invite = await data_agent_controller.connections_controller.create_invitation(alias="Will")
     print("Invite", invite)
@@ -82,21 +94,40 @@ async def start_agent():
 
     accepted = await researcher_agent_controller.connections_controller.accept_invitation(response["connection_id"])
 
+    print("REsearcher ID", response["connection_id"])
+    researcher_id = response["connection_id"]
     print("Invite Accepted")
     print(accepted)
 
-    connections = await data_agent_controller.connections_controller.get_connections()
-    print("DATA AGENT CONNECTIONS")
-    for connection in connections:
-        print(connection)
+    await detect_connection_request()
 
+    connection = await data_agent_controller.connections_controller.accept_request(data_connection_id)
 
+    print(connection)
+    # await detect_connection_active()
 
+    connection = await data_agent_controller.connections_controller.get_connection(data_connection_id)
+    print("DATA AGENT CONNECTION")
+    print(connection)
+    # for connection in connections:
+    #     print(connection)
+
+    time.sleep(4)
+    connection = await data_agent_controller.connections_controller.get_connection(data_connection_id)
+    print("DATA AGENT CONNECTION")
+    print(connection)
+
+    connection = await researcher_agent_controller.connections_controller.get_connection(researcher_id)
+    print("RESEARCH AGENT CONNECTION")
+    print(connection)
+
+    # while connection["state"] != "active":
+    #     connection = await data_agent_controller.connections_controller.get_connection(data_connection_id)
 
     # print(success)
-    time.sleep(200)
-    await data_agent_controller.terminate()
-    await researcher_agent_controller.terminate()
+    time.sleep(2)
+    # await data_agent_controller.terminate()
+    # await researcher_agent_controller.terminate()
 
 
 if __name__ == "__main__":
