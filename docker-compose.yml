@@ -1,7 +1,7 @@
 version: "3"
 services:
   researcher-agent:
-    image: bcgovimages/aries-cloudagent:py36-1.11-1_0.3.5
+    image: bcgovimages/aries-cloudagent:py36-1.14-1_0.5.1
     ports:
       - ${RESEARCHER_HTTP_PORT}:${RESEARCHER_HTTP_PORT}
       - ${RESEARCHER_ADMIN_PORT}:${RESEARCHER_ADMIN_PORT}
@@ -22,7 +22,7 @@ services:
           --label ${RESEARCHER_AGENT_NAME}",
         ]
   data-agent:
-    image: bcgovimages/aries-cloudagent:py36-1.11-1_0.3.5
+    image: bcgovimages/aries-cloudagent:py36-1.14-1_0.5.1
     ports:
       - ${DATA_HTTP_PORT}:${DATA_HTTP_PORT}
       - ${DATA_ADMIN_PORT}:${DATA_ADMIN_PORT}
