@@ -51,6 +51,14 @@ async def start_agent():
         connection_id = payload["connection_id"]
         print("Handle research connections ", payload["state"], connection_id)
 
+    def research_messages_hook(payload):
+        connection_id = payload["connection_id"]
+        print("Handle research messages ", payload, connection_id)
+
+    def data_messages_hook(payload):
+        connection_id = payload["connection_id"]
+        print("Handle data messages ", payload, connection_id)
+
     async def detect_connection_active():
         await data_id_active
 
@@ -81,8 +89,21 @@ async def start_agent():
         "topic": "connections"
     }
 
+    data_message_listener = {
+        "handler": data_messages_hook,
+        "topic": "basicmessages"
+    }
+
+    research_message_listener = {
+        "handler": research_messages_hook,
+        "topic": "basicmessages"
+    }
+
     data_agent_controller.register_listeners([data_connection_listener])
     researcher_agent_controller.register_listeners([research_connection_listener])
+
+    data_agent_controller.register_listeners([data_message_listener])
+    researcher_agent_controller.register_listeners([research_message_listener])
 
     invite = await data_agent_controller.connections_controller.create_invitation(alias="Will")
     print("Invite", invite)
@@ -94,7 +115,7 @@ async def start_agent():
 
     accepted = await researcher_agent_controller.connections_controller.accept_invitation(response["connection_id"])
 
-    print("REsearcher ID", response["connection_id"])
+    print("Researcher ID", response["connection_id"])
     researcher_id = response["connection_id"]
     print("Invite Accepted")
     print(accepted)
