@@ -102,17 +102,27 @@ async def start_agent():
     await detect_connection_request()
 
     connection = await data_agent_controller.connections_controller.accept_request(data_connection_id)
-
+    print("ACCEPT REQUEST")
     print(connection)
     # await detect_connection_active()
 
     connection = await data_agent_controller.connections_controller.get_connection(data_connection_id)
     print("DATA AGENT CONNECTION")
     print(connection)
-    # for connection in connections:
-    #     print(connection)
 
-    time.sleep(4)
+    while connection["state"] != "active":
+        trust_ping = await data_agent_controller.connections_controller.trust_ping(data_connection_id, "hello")
+        print("TUST PING TO ACTIVATE CONNECTION - DATA -> RESEARCH")
+        print(trust_ping)
+        time.sleep(5)
+        connection = await data_agent_controller.connections_controller.get_connection(data_connection_id)
+
+    trust_ping = await researcher_agent_controller.connections_controller.trust_ping(researcher_id,"hello")
+    print("TUST PING TO ACTIVATE CONNECTION - RESEARCH -> DATA")
+    print(trust_ping)
+
+    print("RESEARCHER ID {} DATA ID {}".format(researcher_id,data_connection_id))
+
     connection = await data_agent_controller.connections_controller.get_connection(data_connection_id)
     print("DATA AGENT CONNECTION")
     print(connection)
@@ -121,8 +131,17 @@ async def start_agent():
     print("RESEARCH AGENT CONNECTION")
     print(connection)
 
-    # while connection["state"] != "active":
-    #     connection = await data_agent_controller.connections_controller.get_connection(data_connection_id)
+    #send some basic messages
+    message = await researcher_agent_controller.connections_controller.send_message(researcher_id,"hello from researcher world!")
+    print("BASIC MESSAGE - RESEARCH -> DATA")
+    print(message)
+
+    #send some basic messages
+    message = await data_agent_controller.connections_controller.send_message(data_connection_id,"hello from data world!")
+    print("BASIC MESSAGE - DATA -> RESEARCH")
+    print(message)
+
+
 
     # print(success)
     time.sleep(2)
