@@ -41,18 +41,25 @@ services:
       --log-level info \
       --label ${DATA_AGENT_NAME}",
     ]
-  controller-example:
+  researcher-controller:
     build: .
     ports:
-      - ${DATA_WEBHOOK_PORT}:${DATA_WEBHOOK_PORT}
       - ${RESEARCHER_WEBHOOK_PORT}:${RESEARCHER_WEBHOOK_PORT}
     depends_on:
-      - data-agent
       - researcher-agent
     environment:
       - RESEARCHER_ADMIN_URL=http://researcher-agent:${RESEARCHER_ADMIN_PORT}
       - RESEARCHER_WEBHOOK_PORT=${RESEARCHER_WEBHOOK_PORT}
       - RESEARCHER_WEBHOOK_HOST=0.0.0.0
+    command: [ "python", "./researcher.py" ]
+  data-controller:
+    build: .
+    ports:
+      - ${DATA_WEBHOOK_PORT}:${DATA_WEBHOOK_PORT}
+    depends_on:
+      - data-agent
+    environment:
       - DATA_ADMIN_URL=http://data-agent:${DATA_ADMIN_PORT}
       - DATA_WEBHOOK_PORT=${DATA_WEBHOOK_PORT}
       - DATA_WEBHOOK_HOST=0.0.0.0
+    command: [ "python", "./data_owner.py" ]
