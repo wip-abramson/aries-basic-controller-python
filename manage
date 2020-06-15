@@ -113,8 +113,10 @@ configureEnvironment() {
 
   # global
   export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-om_grid}"
-  export LEDGER_URL=${LEDGER_URL-http://$DOCKERHOST:9000}
-  export WALLET_TYPE="indy"
+
+  export GENESIS_URL="https://raw.githubusercontent.com/sovrin-foundation/sovrin/master/sovrin/pool_transactions_builder_genesis"
+  export RUN_MODE="docker"
+  export DEFAULT_BIN_PATH="."
 
   # researcher-agent
   export RESEARCHER_AGENT_NAME="Alice"

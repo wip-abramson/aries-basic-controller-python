@@ -14,3 +14,4 @@ requests~=2.23.0
 PyPubSub
 pygments
 python-dotenv
+qrcode

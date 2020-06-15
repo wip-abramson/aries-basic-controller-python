@@ -51,6 +51,7 @@ services:
       - RESEARCHER_ADMIN_URL=http://researcher-agent:${RESEARCHER_ADMIN_PORT}
       - RESEARCHER_WEBHOOK_PORT=${RESEARCHER_WEBHOOK_PORT}
       - RESEARCHER_WEBHOOK_HOST=0.0.0.0
+      - GENESIS_URL=${GENESIS_URL}
     command: [ "python", "./researcher.py" ]
   data-controller:
     build: .
@@ -62,4 +63,5 @@ services:
       - DATA_ADMIN_URL=http://data-agent:${DATA_ADMIN_PORT}
       - DATA_WEBHOOK_PORT=${DATA_WEBHOOK_PORT}
       - DATA_WEBHOOK_HOST=0.0.0.0
+      - GENESIS_URL=${GENESIS_URL}
     command: [ "python", "./data_owner.py" ]
