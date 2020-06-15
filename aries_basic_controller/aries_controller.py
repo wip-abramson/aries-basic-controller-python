@@ -31,6 +31,7 @@ class AriesAgentController:
             self.connections_controller = ConnectionsController(self.admin_url, self.client_session)
         self.proc = None
 
+
     def register_listeners(self, listeners):
         for listener in listeners:
             log_msg(listener["handler"])
@@ -52,10 +53,11 @@ class AriesAgentController:
         return web.Response(status=200)
 
     async def handle_webhook(self, topic, payload):
-        log_msg(f"Hanlde {topic}")
-        log_msg(payload)
+        # log_msg(f"Hanlde {topic}")
+        # log_msg(payload)
         pub.sendMessage(topic, payload=payload)
         return web.Response(status=200)
+
 
     async def terminate(self):
         # loop = asyncio.get_event_loop()

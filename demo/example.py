@@ -30,25 +30,52 @@ async def start_agent():
     researcher_agent_controller = AriesAgentController(webhook_host=RESEARCHER_WEBHOOK_HOST, webhook_port=RESEARCHER_WEBHOOK_PORT,
                                                webhook_base=RESEARCHER_WEBHOOK_BASE, admin_url=RESEARCHER_ADMIN_URL, connections=True)
 
-    def connections_hook(payload):
+    data_connection_id = None
+    data_id_ready = asyncio.Future()
+
+    def data_connections_hook(payload):
+        connection_id = payload["connection_id"]
+        print("Handle data connections ", connection_id)
         print(payload)
-        print("THE CONNECTIONS HOOK WORKS")
+        if connection_id == data_connection_id:
+            print("ID Equal")
+            if payload["state"] == "request":
+                print("Connection Request")
+                asyncio.get_event_loop().run_until_complete(data_agent_controller.connections_controller.accept_request(connection_id))
+
+            if payload["state"] == "active" and not data_id_ready.done():
+                print("Connection Active", connection_id)
+                data_id_ready.set_result(True)
+
+    async def detect_connection():
+        await data_id_ready
+
+    @property
+    def connection_ready():
+        return data_id_ready.done() and data_id_ready.result()
+
+
+
 
 
     await researcher_agent_controller.listen_webhooks()
 
     await data_agent_controller.listen_webhooks()
 
+
+
     data_connection_listener = {
-        "handler": connections_hook,
+        "handler": data_connections_hook,
         "topic": "connections"
     }
 
-    researcher_agent_controller.register_listeners([data_connection_listener])
+    data_agent_controller.register_listeners([data_connection_listener])
 
 
     invite = await data_agent_controller.connections_controller.create_invitation(alias="Will")
     print("Invite", invite)
+
+    data_connection_id = invite["connection_id"]
 
     response = await researcher_agent_controller.connections_controller.receive_invitation(invite["invitation"])
     print(response)
@@ -63,10 +90,11 @@ async def start_agent():
     for connection in connections:
         print(connection)
 
-    # success = await data_agent_controller.connections_controller.accept_request(invite["connection_id"])
+
+
 
     # print(success)
-    time.sleep(20)
+    time.sleep(200)
     await data_agent_controller.terminate()
     await researcher_agent_controller.terminate()
 

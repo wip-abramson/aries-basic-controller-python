@@ -45,8 +45,16 @@ class ConnectionsController(BaseController):
         return response
 
     async def accept_request(self, connection_id: str):
-        response = await self.admin_POST(f"/connections/{connection_id}/accept-request")
-        return response
+        # TODO get if connection_id is in request state, else throw error
+        connection = await self.get_connection(connection_id)
+        print(connection["state"])
+        if connection["state"] == "request":
+            response = await self.admin_POST(f"/connections/{connection_id}/accept-request")
+            return response
+        else:
+            ## TODO create proper error classes
+            raise Exception("The connection is not in the request state")
+
 
     async def remove_connection(self, connection_id):
         response = await self.admin_POST(f"/connections/{connection_id}")
