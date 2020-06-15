@@ -44,6 +44,10 @@ class ConnectionsController(BaseController):
         response = await self.admin_POST(f"/connections/{connection_id}/accept-invitation")
         return response
 
+    async def trust_ping(self, connection_id: str, msg: str):
+        response = await self.admin_POST(f"/connections/{connection_id}/send-ping",{"content": msg})
+        return response
+
     async def accept_request(self, connection_id: str):
         # TODO get if connection_id is in request state, else throw error
         connection = await self.get_connection(connection_id)
