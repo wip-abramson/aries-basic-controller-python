@@ -28,14 +28,15 @@ class AriesAgentController:
         self.connections_controller = None
         self.client_session: ClientSession = ClientSession()
         if connections:
-            self.connections_controller = ConnectionsController(self.admin_url, self.client_session)
+            self.connections = ConnectionsController(self.admin_url, self.client_session)
         self.proc = None
 
 
-    def register_listeners(self, listeners):
+    def register_listeners(self, listeners, defaults=True):
+        if defaults:
+            if self.connections:
+                pub.subscribe(self.connections.default_handler, "connections")
         for listener in listeners:
-            log_msg(listener["handler"])
-            log_msg(listener["topic"])
             pub.subscribe(listener["handler"], listener["topic"])
 
     async def listen_webhooks(self):
