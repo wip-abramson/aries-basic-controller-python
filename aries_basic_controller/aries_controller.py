@@ -11,11 +11,11 @@ import asyncio
 
 from .utils import log_msg
 from .connections_controller import ConnectionsController
-
+from .messaging_controller import MessagingController
 
 class AriesAgentController:
 
-    def __init__(self, webhook_host: str, webhook_port: int, admin_url: str, connections: bool, webhook_base: str = ""):
+    def __init__(self, webhook_host: str, webhook_port: int, admin_url: str, webhook_base: str = "", connections: bool=True, messaging: bool=True):
 
         self.webhook_site = None
         self.admin_url = admin_url
@@ -29,6 +29,8 @@ class AriesAgentController:
         self.client_session: ClientSession = ClientSession()
         if connections:
             self.connections = ConnectionsController(self.admin_url, self.client_session)
+        if messaging:
+            self.messaging = MessagingController(self.admin_url, self.client_session)
         self.proc = None
 
 
@@ -36,6 +38,10 @@ class AriesAgentController:
         if defaults:
             if self.connections:
                 pub.subscribe(self.connections.default_handler, "connections")
+            if self.messaging:
+                pub.subscribe(self.messaging.default_handler, "basic_messages")
+
+
         for listener in listeners:
             pub.subscribe(listener["handler"], listener["topic"])
 
