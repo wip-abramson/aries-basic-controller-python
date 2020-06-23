@@ -37,8 +37,8 @@ agent_controller = AriesAgentController(WEBHOOK_HOST, WEBHOOK_PORT, WEBHOOK_BASE
 await agent_controller.listen_webhooks()
 
 # Controllers re-emit webhooks as events through PyPubSub
-# Basic state management is handled through defaults but you can choose to pass in custom handlers
-agent_controller.register_listeners(custom_handler, defaults=True)
+# Basic state management is handled through defaults but you can choose to pass in custom handlers as an array
+agent_controller.register_listeners([custom_handler], defaults=True)
 
 # Create Invitation
 invite = await agent_controller.connections.create_invitation(alias="Will")
