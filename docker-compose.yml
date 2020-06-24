@@ -58,7 +58,10 @@ services:
       - DATA_WEBHOOK_HOST=0.0.0.0
 
   data-notebook:
-    build: ./docker-images/pysyft-notebook
+    build:
+      context: ./docker-images/pysyft-notebook
+      args:
+        - jupyter_port=${DATA_JUPYTER_PORT}
     volumes:
       - ./demo/data_owner:/workspace
     ports:
@@ -67,7 +70,10 @@ services:
 
 
   researcher-notebook:
-    build: ./docker-images/pysyft-notebook
+    build:
+      context: ./docker-images/pysyft-notebook
+      args:
+        - jupyter_port=${RESEARCHER_JUPYTER_PORT}
     volumes:
       - ./demo/researcher:/workspace
     ports:
