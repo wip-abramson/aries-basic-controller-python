@@ -54,6 +54,8 @@ invite = await agent_controller.connections.create_invitation(alias="Will")
 
 # Sequence Diagram
 
+Built using [Sequence Diagram](https://sequencediagram.org)
+
 ![Sequence Diagram](./sequence_diagrams/controller_basic_messaging.svg)
 
 # Contributing
