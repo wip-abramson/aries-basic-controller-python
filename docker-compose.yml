@@ -73,3 +73,10 @@ services:
     image: openmined/pysyft-notebook
     ports:
       - "8889:8888"
+    command: [
+      "-c",
+      "pip install aiohttp~=3.6.2",
+      "pip install PyPubSub",
+      "pip install asyncio",
+      "python3 -m pip install --index-url https://test.pypi.org/simple/ aries_basic_controller",
+    ]
