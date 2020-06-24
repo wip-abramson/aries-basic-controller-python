@@ -1,0 +1,79 @@
+title Aries Basic Messaging between Data Owner and Researcher
+actor DataOwner
+participant Aries_DataOwner_Controller
+participant Aries_DataOwner_Agent
+participant Aries_Researcher_Agent
+participant Aries_Researcher_Controller
+actor Researcher
+
+entryspacing 0.5
+DataOwner->Aries_DataOwner_Controller: Instantiate Aries Controller
+Researcher->Aries_Researcher_Controller: Instantiate Aries Controller
+
+group Create Invitation Request
+DataOwner->Aries_DataOwner_Controller: Invite Request
+Aries_DataOwner_Controller->Aries_DataOwner_Agent: POST Invitation Request
+Aries_DataOwner_Agent->Aries_DataOwner_Controller: Invitation Response
+Aries_DataOwner_Controller->Aries_DataOwner_Controller: Keep State of Connection ID
+Aries_DataOwner_Controller->DataOwner: Receive Invitation Response
+end
+
+group Accept Connection
+Researcher->Aries_Researcher_Controller: Receive Invitation from Data Owner
+Researcher->Aries_Researcher_Controller: Accept Connection
+Aries_Researcher_Controller->Aries_Researcher_Agent: POST Accept Connection
+Aries_Researcher_Agent->Aries_DataOwner_Agent: DIDComm?
+Aries_Researcher_Agent->Aries_DataOwner_Agent: POST Webhook Event
+Aries_DataOwner_Agent->Aries_DataOwner_Controller: Receive Webhook Event
+Aries_DataOwner_Agent->Aries_Researcher_Agent: DIDComm?
+Aries_Researcher_Agent->Aries_Researcher_Controller: Accept Connection Response
+Aries_Researcher_Controller->Aries_Researcher_Controller: Keep State of Connection ID
+Aries_Researcher_Controller->Researcher: Receive Connection Accept Response
+end
+
+group Accept Connection Request
+DataOwner->Aries_DataOwner_Controller: Accept Request
+Aries_DataOwner_Controller->Aries_DataOwner_Agent: POST Accept Request
+Aries_DataOwner_Agent->Aries_Researcher_Agent: DIDComm?
+Aries_DataOwner_Agent->Aries_Researcher_Agent: POST Webhook Event
+Aries_Researcher_Agent->Aries_Researcher_Controller: Receive Webhook Event
+Aries_Researcher_Agent->Aries_DataOwner_Agent: DIDComm?
+Aries_DataOwner_Agent->Aries_DataOwner_Controller: Accept Request Response
+Aries_DataOwner_Controller->DataOwner: Receive Accept Request Response
+end
+
+group Check Connection Status
+DataOwner->Aries_DataOwner_Controller: Get Connection by ID
+Aries_DataOwner_Controller->Aries_DataOwner_Agent: POST Get Connection Status
+Aries_DataOwner_Agent->Aries_DataOwner_Controller: Request Response
+Aries_DataOwner_Controller->DataOwner: Receive Connection Status Response
+end
+
+group Send Trust Ping to Change State of Connection
+DataOwner->DataOwner: If Connection Status != "active"
+DataOwner->Aries_DataOwner_Controller: Send Trust Ping to Connection ID
+Aries_DataOwner_Controller->Aries_DataOwner_Agent: POST Trust Ping
+Aries_DataOwner_Agent->Aries_Researcher_Agent:Send Trust Ping
+Aries_DataOwner_Agent->Aries_Researcher_Agent:POST Webhook Event
+Aries_Researcher_Agent->Aries_Researcher_Controller: Receive Webhook Event
+Aries_Researcher_Agent->Aries_DataOwner_Agent: Response Trust Ping
+Aries_DataOwner_Agent->Aries_DataOwner_Controller: Receive Trust Ping Response
+DataOwner->DataOwner: Connection Status == "active"
+note over DataOwner,Aries_DataOwner_Controller: Connection in **active** state
+end
+
+group Send Basic Message - Data Owner to Researcher
+DataOwner->Aries_DataOwner_Controller: Send Basic Message
+Aries_DataOwner_Controller->Aries_DataOwner_Agent: POST Basic Message
+Aries_DataOwner_Agent->Aries_Researcher_Agent: DIDComm
+Aries_Researcher_Agent->Aries_Researcher_Controller: Receive Basic Message
+Aries_Researcher_Controller->Researcher: Receive Basic Message
+end
+
+group Send Basic Message - Researcher to Data Owner
+Researcher->Aries_Researcher_Controller: Send Basic Message
+Aries_Researcher_Controller->Aries_Researcher_Agent: POST Basic Message
+Aries_Researcher_Agent->Aries_DataOwner_Agent: DIDComm
+Aries_DataOwner_Agent->Aries_DataOwner_Controller: Receive Basic Message
+Aries_DataOwner_Controller->DataOwner: Receive Basic Message
+end
