@@ -57,31 +57,19 @@ services:
       - DATA_WEBHOOK_PORT=${DATA_WEBHOOK_PORT}
       - DATA_WEBHOOK_HOST=0.0.0.0
 
-  # data-notebook:
-  #   build: notebook-dockerfile
-  #   ports:
-  #     - ${DATA_WEBHOOK_PORT}:${DATA_WEBHOOK_PORT}
-  #     - ${RESEARCHER_WEBHOOK_PORT}:${RESEARCHER_WEBHOOK_PORT}
-  #   depends_on:
-  #     - data-agent
-  #     - researcher-agent
-  #   environment:
-  #     - RESEARCHER_ADMIN_URL=http://researcher-agent:${RESEARCHER_ADMIN_PORT}
-  #     - RESEARCHER_WEBHOOK_PORT=${RESEARCHER_WEBHOOK_PORT}
-  #     - RESEARCHER_WEBHOOK_HOST=0.0.0.0
-  #     - DATA_ADMIN_URL=http://data-agent:${DATA_ADMIN_PORT}
-  #     - DATA_WEBHOOK_PORT=${DATA_WEBHOOK_PORT}
-  #     - DATA_WEBHOOK_HOST=0.0.0.0
-
   data-notebook:
-    image: openmined/pysyft-notebook
+    build: ./docker-images/pysyft-notebook
+    volumes:
+      - ./demo/data_owner:/workspace
     ports:
       - "8888:8888"
       - ${DATA_WEBHOOK_PORT}:${DATA_WEBHOOK_PORT}
 
 
   researcher-notebook:
-    image: openmined/pysyft-notebook
+    build: ./docker-images/pysyft-notebook
+    volumes:
+      - ./demo/researcher:/workspace
     ports:
       - "8889:8888"
       - ${RESEARCHER_WEBHOOK_PORT}:${RESEARCHER_WEBHOOK_PORT}
