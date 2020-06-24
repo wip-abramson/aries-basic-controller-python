@@ -52,6 +52,10 @@ invite = await agent_controller.connections.create_invitation(alias="Will")
 
 ```
 
+# Sequence Diagram
+
+![Sequence Diagram](./sequence_diagrams/controller_basic_messaging.svg)
+
 # Contributing
 
 This is a part of a project being developed within the [Open Mined](https://openmined.org) open source community. We welcome new contributors, either join our slack channel or just comment on an issue.
