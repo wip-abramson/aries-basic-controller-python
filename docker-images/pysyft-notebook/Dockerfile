@@ -3,6 +3,7 @@ FROM continuumio/miniconda3
 ENV WORKSPACE /workspace
 
 ARG jupyter_port
+ENV env_jupyter_port=jupyter_port
 
 # Setup workspace environment
 RUN apt-get update && apt-get install -y gcc
@@ -19,8 +20,9 @@ WORKDIR $WORKSPACE
 COPY ./entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
-RUN echo "HELLO THIS IS JUPYTER PORT A: $jupyter_port "
 
 
 
+
+# ENTRYPOINT ["/entrypoint.sh", "$env_jupyter_port"]
 ENTRYPOINT ["/entrypoint.sh", "8888"]
