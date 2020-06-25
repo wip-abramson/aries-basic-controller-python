@@ -39,7 +39,6 @@ class ConnectionsController(BaseController):
         response = await self.receive_invitation(invitation)
 
         accepted = await self.accept_invitation(response["connection_id"])
-        print("ACCEPTED CONNECTION - ", accepted)
         return accepted
 
 

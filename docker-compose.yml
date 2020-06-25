@@ -41,6 +41,30 @@ services:
       --log-level info \
       --label ${DATA_AGENT_NAME}",
     ]
+  data-notebook:
+    build:
+      context: ./docker-images/pysyft-notebook
+      args:
+        - jupyter_port=${DATA_JUPYTER_PORT}
+    depends_on:
+      - data-agent
+    volumes:
+      - ./demo/data_owner:/workspace
+    ports:
+      - "8888:8888"
+      - ${DATA_WEBHOOK_PORT}:${DATA_WEBHOOK_PORT}
+  researcher-notebook:
+    build:
+      context: ./docker-images/pysyft-notebook
+      args:
+        - jupyter_port=${RESEARCHER_JUPYTER_PORT}
+    depends_on:
+      - researcher-agent
+    volumes:
+      - ./demo/researcher:/workspace
+    ports:
+      - "8889:8888"
+      - ${RESEARCHER_WEBHOOK_PORT}:${RESEARCHER_WEBHOOK_PORT}
   controller-example:
     build: .
     ports:
@@ -56,26 +80,3 @@ services:
       - DATA_ADMIN_URL=http://data-agent:${DATA_ADMIN_PORT}
       - DATA_WEBHOOK_PORT=${DATA_WEBHOOK_PORT}
       - DATA_WEBHOOK_HOST=0.0.0.0
-
-  data-notebook:
-    build:
-      context: ./docker-images/pysyft-notebook
-      args:
-        - jupyter_port=${DATA_JUPYTER_PORT}
-    volumes:
-      - ./demo/data_owner:/workspace
-    ports:
-      - "8888:8888"
-      - ${DATA_WEBHOOK_PORT}:${DATA_WEBHOOK_PORT}
-
-
-  researcher-notebook:
-    build:
-      context: ./docker-images/pysyft-notebook
-      args:
-        - jupyter_port=${RESEARCHER_JUPYTER_PORT}
-    volumes:
-      - ./demo/researcher:/workspace
-    ports:
-      - "8889:8888"
-      - ${RESEARCHER_WEBHOOK_PORT}:${RESEARCHER_WEBHOOK_PORT}
