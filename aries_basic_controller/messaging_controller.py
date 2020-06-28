@@ -15,20 +15,8 @@ class MessagingController(BaseController):
         logger.debug("Message Recieved ", payload)
 
     async def send_message(self, connection_id, msg):
-        base64file = base64.b64encode("Hello Will".encode())
-
         response = await self.admin_POST(f"/connections/{connection_id}/send-message", {
             "content": msg,
-            "~attach": [
-                {
-                    "@id": "test1",
-                    "mime-type": "txt",
-                    "filename": "mlexchange",
-                    "data": {
-                        "base64": str(base64file)
-                    }
-                }
-            ]
         })
         return response
 
