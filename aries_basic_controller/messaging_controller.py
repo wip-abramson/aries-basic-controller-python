@@ -12,7 +12,7 @@ class MessagingController(BaseController):
 
 
     def default_handler(self, payload):
-        logger.debug("Message Recieved ", payload)
+        logger.debug("Message Received ", payload)
 
     async def send_message(self, connection_id, msg):
         response = await self.admin_POST(f"/connections/{connection_id}/send-message", {
