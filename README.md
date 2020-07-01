@@ -13,44 +13,18 @@ Package only available on the test at the moment.
 
 With docker installed, run the example using ./manage start
 
-See the demo folder for an example of how to use the aries_basic_controller in your project.
+This spins up an aries agent and a notebook for both Alice and Bob. Additionally a local von-network is initialised.
 
-Current functionality:
-* Spin up two docker images for the researcher and data owner agents
-* Load the example.py file
-    * Create webhook listeners for connection and basic messages
-    * Establish connection between two agents
-    * Send basic messages between two agents
-    * Listen for webhook events
+To view the tutorials navigate to:
+* [Alice notebook](http://localhost:8888) - this contains the majority of the tutorials
+* [Bob notebook](http://localhost:8888) - Bob plays the other half of the protocols when needed.
 
-
-# Tutorial
-
-```python
-from aries_basic_controller.aries_controller import AriesAgentController
+Both notebooks require a token that can be found in the logs. Fetch the logs for the relevant container using these commands:
+* docker logs aries-basic-controller-python_alice-notebook_1
+* docker logs aries-basic-controller-python_bob-notebook_1
 
 
-# Based on the aca-py agent you wish to control
-agent_controller = AriesAgentController(WEBHOOK_HOST, WEBHOOK_PORT, WEBHOOK_BASE, ADMIN_URL)
 
-# Spins up server to respond to any webhook events from the agent
-await agent_controller.listen_webhooks()
-
-# The controller re-emit webhooks as events through PyPubSub
-# You can define as many custom listeners for these events
-custom_listener = {
-   "topic": "basicmessages",
-   "handler": custom_handler"
-}
-
-# Basic state management is handled through defaults but you can choose to pass in a set of listeners as an array
-agent_controller.register_listeners([custom_listener], defaults=True)
-
-# Create Invitation
-invite = await agent_controller.connections.create_invitation(alias="Will")
-
-
-```
 
 # Sequence Diagram
 
