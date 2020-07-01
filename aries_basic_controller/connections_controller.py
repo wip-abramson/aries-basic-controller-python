@@ -44,37 +44,77 @@ class ConnectionsController(BaseController):
     ### TODO refactor to extract out generic base - /connections
 
     async def get_connections(self, alias: str = None, initiator: str = None, invitation_key: str = None, my_did: str = None, state: str = None, their_did: str = None, their_role: str = None):
-        connections = await self.admin_GET("/connections", params={"alias": alias, "initiator": initiator, "invitation_key": invitation_key, "my_did": my_did, "state": state, "their_did": their_did, "their_role": their_role})
+        params = {}
+        if alias:
+            params["alias"] = alias
+        if initiator:
+            params["initiator"] = initiator
+        if invitation_key:
+            params["invitation_key"] = invitation_key
+        if my_did:
+            params["my_did"] = my_did
+        if state:
+            params["state"] = state
+        if their_did:
+            params["their_did"] = their_did
+        if their_role:
+            params["their_role"] = their_role
+
+        connections = await self.admin_GET("/connections", params=params)
         return connections
 
     async def get_connection(self, connection_id: str):
         connection = await self.admin_GET(f"/connections/{connection_id}")
         return connection
 
-    async def create_invitation(self, alias: str = None, auto_accept: bool = None, public: bool = False, multi_use: bool = False ):
-        invite_details = await self.admin_POST("/connections/create-invitation",params = {"alias": alias, "auto_accept": auto_accept, "public": public, "multi_use": multi_use })
+    async def create_invitation(self, alias: str = None, auto_accept: bool = None, public: str = None, multi_use: str = None ):
+        params = {}
+        if alias:
+            params["alias"] = alias
+        if auto_accept:
+            params["auto_accept"] = auto_accept
+        if public:
+            params["public"] = public
+        if multi_use:
+            params["multi_use"] = multi_use
+
+        invite_details = await self.admin_POST("/connections/create-invitation", params = params)
         connection = Connection(invite_details["connection_id"], "invitation")
         self.connections.append(connection)
         return invite_details
 
     async def receive_invitation(self, connection_details: str, alias: str = None, auto_accept: bool = None):
-        response = await self.admin_POST("/connections/receive-invitation", connection_details, params = {"alias": alias, "auto_accept": auto_accept})
+        params = {}
+        if alias:
+            params["alias"] = alias
+        if auto_accept:
+            params["auto_accept"] = auto_accept
+
+        response = await self.admin_POST("/connections/receive-invitation", connection_details, params = params)
         connection = Connection(response["connection_id"], response["state"])
         self.connections.append(connection)
         logger.debug("Connection Received - " + connection.id)
         return response
 
     async def accept_invitation(self, connection_id: str, my_label: str = None, my_endpoint: str = None):
-        response = await self.admin_POST(f"/connections/{connection_id}/accept-invitation",params = {"my_label": my_label, "my_endpoint": my_endpoint})
+        params = {}
+        if my_label:
+            params["my_label"] = my_label
+        if my_endpoint:
+            params["my_endpoint"] = my_endpoint
+        response = await self.admin_POST(f"/connections/{connection_id}/accept-invitation",params = params)
         return response
 
 
     async def accept_request(self, connection_id: str, my_endpoint: str = None):
         # TODO get if connection_id is in request state, else throw error
+        params = {}
+        if my_endpoint:
+            params["my_endpoint"] = my_endpoint
         connection_ready = await self.check_connection_ready(connection_id, "request")
         print(connection_ready)
         if connection_ready:
-            response = await self.admin_POST(f"/connections/{connection_id}/accept-request",params = {"my_endpoint": my_endpoint})
+            response = await self.admin_POST(f"/connections/{connection_id}/accept-request",params = params)
             return response
         else:
             ## TODO create proper error classes
