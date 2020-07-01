@@ -52,8 +52,6 @@ class ConnectionsController(BaseController):
         return connection
 
     async def create_invitation(self, alias: str = None, auto_accept: bool = None, public: bool = False, multi_use: bool = False ):
-        ### TODO add in arguments
-
         invite_details = await self.admin_POST("/connections/create-invitation",params = {"alias": alias, "auto_accept": auto_accept, "public": public, "multi_use": multi_use })
         connection = Connection(invite_details["connection_id"], "invitation")
         self.connections.append(connection)
@@ -71,12 +69,12 @@ class ConnectionsController(BaseController):
         return response
 
 
-    async def accept_request(self, connection_id: str):
+    async def accept_request(self, connection_id: str, my_endpoint: str = None):
         # TODO get if connection_id is in request state, else throw error
         connection_ready = await self.check_connection_ready(connection_id, "request")
         print(connection_ready)
         if connection_ready:
-            response = await self.admin_POST(f"/connections/{connection_id}/accept-request")
+            response = await self.admin_POST(f"/connections/{connection_id}/accept-request",params = {"my_endpoint": my_endpoint})
             return response
         else:
             ## TODO create proper error classes
