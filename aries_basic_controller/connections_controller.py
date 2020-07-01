@@ -1,6 +1,5 @@
 from .base_controller import BaseController
 from .connection import Connection
-from pubsub import pub
 
 from aiohttp import (
     web,
@@ -70,9 +69,6 @@ class ConnectionsController(BaseController):
         response = await self.admin_POST(f"/connections/{connection_id}/accept-invitation")
         return response
 
-    async def trust_ping(self, connection_id: str, msg: str):
-        response = await self.admin_POST(f"/connections/{connection_id}/send-ping",{"content": msg})
-        return response
 
     async def accept_request(self, connection_id: str):
         # TODO get if connection_id is in request state, else throw error
@@ -90,9 +86,7 @@ class ConnectionsController(BaseController):
         response = await self.admin_POST(f"/connections/{connection_id}")
         return response
 
-    async def send_message(self, connection_id, msg):
-        response = await self.admin_POST(f"/connections/{connection_id}/send-message", {"content": msg})
-        return response
+
 
     async def check_connection_ready(self, connection_id, state):
         stored = False

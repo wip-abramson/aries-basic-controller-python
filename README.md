@@ -27,7 +27,7 @@ Current functionality:
 # Tutorial
 
 ```python
-from aries_basic_controller import AriesAgentController
+from aries_basic_controller.aries_controller import AriesAgentController
 
 
 # Based on the aca-py agent you wish to control
