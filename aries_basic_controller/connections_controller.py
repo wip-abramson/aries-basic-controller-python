@@ -53,21 +53,21 @@ class ConnectionsController(BaseController):
 
     async def create_invitation(self, alias: str = None, auto_accept: bool = None, public: bool = False, multi_use: bool = False ):
         ### TODO add in arguments
-        invite_details = await self.admin_POST("/connections/create-invitation?alias=" + alias + "&accept=" + auto_accept + "&public=" + public + "&multi_use=" + multi_use)
+
+        invite_details = await self.admin_POST("/connections/create-invitation",params = {"alias": alias, "auto_accept": auto_accept, "public": public, "multi_use": multi_use })
         connection = Connection(invite_details["connection_id"], "invitation")
         self.connections.append(connection)
         return invite_details
 
-    async def receive_invitation(self, connection_details: str):
-        response = await self.admin_POST("/connections/receive-invitation", connection_details)
+    async def receive_invitation(self, connection_details: str, alias: str = None, auto_accept: bool = None):
+        response = await self.admin_POST("/connections/receive-invitation", connection_details, params = {"alias": alias, "auto_accept": auto_accept})
         connection = Connection(response["connection_id"], response["state"])
         self.connections.append(connection)
         logger.debug("Connection Received - " + connection.id)
         return response
 
-
-    async def accept_invitation(self, connection_id: str):
-        response = await self.admin_POST(f"/connections/{connection_id}/accept-invitation")
+    async def accept_invitation(self, connection_id: str, my_label: str = None, my_endpoint: str = None):
+        response = await self.admin_POST(f"/connections/{connection_id}/accept-invitation",params = {"my_label": my_label, "my_endpoint": my_endpoint})
         return response
 
 
