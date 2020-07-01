@@ -1,82 +1,67 @@
 version: "3"
 services:
-  researcher-agent:
+  bob-agent:
     image: bcgovimages/aries-cloudagent:py36-1.14-1_0.5.1
     ports:
-      - ${RESEARCHER_HTTP_PORT}:${RESEARCHER_HTTP_PORT}
-      - ${RESEARCHER_ADMIN_PORT}:${RESEARCHER_ADMIN_PORT}
+      - ${BOB_HTTP_PORT}:${BOB_HTTP_PORT}
+      - ${BOB_ADMIN_PORT}:${BOB_ADMIN_PORT}
     entrypoint: /bin/bash
     command: [
         "-c",
         "
           aca-py start \
-          --inbound-transport http '0.0.0.0' ${RESEARCHER_HTTP_PORT} \
+          --inbound-transport http '0.0.0.0' ${BOB_HTTP_PORT} \
           --outbound-transport http \
-          --endpoint ${RESEARCHER_AGENT_ENDPOINT} \
-          --webhook-url ${RESEARCHER_WEBHOOK_URL} \
+          --endpoint ${BOB_AGENT_ENDPOINT} \
+          --webhook-url ${BOB_WEBHOOK_URL} \
           --wallet-type 'indy' \
-          --seed '${RESEARCHER_WALLET_SEED}' \
-          --admin '0.0.0.0' ${RESEARCHER_ADMIN_PORT} \
+          --seed '${BOB_WALLET_SEED}' \
+          --admin '0.0.0.0' ${BOB_ADMIN_PORT} \
           --admin-insecure-mode \
           --log-level info \
-          --label ${RESEARCHER_AGENT_NAME}",
+          --label ${BOB_AGENT_NAME}",
         ]
-  data-agent:
+  alice-agent:
     image: bcgovimages/aries-cloudagent:py36-1.14-1_0.5.1
     ports:
-      - ${DATA_HTTP_PORT}:${DATA_HTTP_PORT}
-      - ${DATA_ADMIN_PORT}:${DATA_ADMIN_PORT}
+      - ${ALICE_HTTP_PORT}:${ALICE_HTTP_PORT}
+      - ${ALICE_ADMIN_PORT}:${ALICE_ADMIN_PORT}
     entrypoint: /bin/bash
     command: [
       "-c",
       "aca-py start \
-      --inbound-transport http '0.0.0.0' ${DATA_HTTP_PORT} \
+      --inbound-transport http '0.0.0.0' ${ALICE_HTTP_PORT} \
       --outbound-transport http \
-      --endpoint ${DATA_AGENT_ENDPOINT} \
-      --webhook-url ${DATA_WEBHOOK_URL} \
+      --endpoint ${ALICE_AGENT_ENDPOINT} \
+      --webhook-url ${ALICE_WEBHOOK_URL} \
       --wallet-type 'indy' \
-      --seed '${DATA_WALLET_SEED}' \
-      --admin '0.0.0.0' ${DATA_ADMIN_PORT} \
+      --seed '${ALICE_WALLET_SEED}' \
+      --admin '0.0.0.0' ${ALICE_ADMIN_PORT} \
       --admin-insecure-mode \
       --log-level info \
-      --label ${DATA_AGENT_NAME}",
+      --label ${ALICE_AGENT_NAME}",
     ]
-  data-notebook:
+  alice-notebook:
     build:
-      context: ./docker-images/pysyft-notebook
+      context: .
       args:
-        - jupyter_port=${DATA_JUPYTER_PORT}
+        - jupyter_port=${ALICE_JUPYTER_PORT}
     depends_on:
-      - data-agent
+      - alice-agent
     volumes:
-      - ./demo/data_owner:/workspace
+      - ./demo/alice:/workspace
     ports:
       - "8888:8888"
-      - ${DATA_WEBHOOK_PORT}:${DATA_WEBHOOK_PORT}
-  researcher-notebook:
+      - ${ALICE_WEBHOOK_PORT}:${ALICE_WEBHOOK_PORT}
+  bob-notebook:
     build:
-      context: ./docker-images/pysyft-notebook
+      context: .
       args:
-        - jupyter_port=${RESEARCHER_JUPYTER_PORT}
+        - jupyter_port=${BOB_JUPYTER_PORT}
     depends_on:
-      - researcher-agent
+      - bob-agent
     volumes:
-      - ./demo/researcher:/workspace
+      - ./demo/bob:/workspace
     ports:
       - "8889:8888"
-      - ${RESEARCHER_WEBHOOK_PORT}:${RESEARCHER_WEBHOOK_PORT}
-  controller-example:
-    build: .
-    ports:
-      - ${DATA_WEBHOOK_PORT}:${DATA_WEBHOOK_PORT}
-      - ${RESEARCHER_WEBHOOK_PORT}:${RESEARCHER_WEBHOOK_PORT}
-    depends_on:
-      - data-agent
-      - researcher-agent
-    environment:
-      - RESEARCHER_ADMIN_URL=http://researcher-agent:${RESEARCHER_ADMIN_PORT}
-      - RESEARCHER_WEBHOOK_PORT=${RESEARCHER_WEBHOOK_PORT}
-      - RESEARCHER_WEBHOOK_HOST=0.0.0.0
-      - DATA_ADMIN_URL=http://data-agent:${DATA_ADMIN_PORT}
-      - DATA_WEBHOOK_PORT=${DATA_WEBHOOK_PORT}
-      - DATA_WEBHOOK_HOST=0.0.0.0
+      - ${BOB_WEBHOOK_PORT}:${BOB_WEBHOOK_PORT}
