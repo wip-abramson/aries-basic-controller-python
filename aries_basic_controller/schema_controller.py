@@ -10,6 +10,7 @@ class SchemaController(BaseController):
         super().__init__(admin_url, client_session)
         self.base_url = "/schemas"
 
+    ## TODO change to get_by_id
     async def get_schema_by_id(self, schema_id):
 
         response = await self.admin_GET(f"{self.base_url}/{schema_id}")
