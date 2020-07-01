@@ -43,8 +43,9 @@ class ConnectionsController(BaseController):
 
 
     ### TODO refactor to extract out generic base - /connections
-    async def get_connections(self):
-        connections = await self.admin_GET("/connections")
+
+    async def get_connections(self, alias: str = None, initiator: str = None, invitation_key: str = None, my_did: str = None, state: str = None, their_did: str = None, their_role: str = None):
+        connections = await self.admin_GET("/connections", params={"alias": alias, "initiator": initiator, "invitation_key": invitation_key, "my_did": my_did, "state": state, "their_did": their_did, "their_role": their_role})
         return connections
 
     async def get_connection(self, connection_id: str):
