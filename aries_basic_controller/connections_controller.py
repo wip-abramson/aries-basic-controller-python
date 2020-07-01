@@ -81,12 +81,13 @@ class ConnectionsController(BaseController):
             ## TODO create proper error classes
             raise Exception("The connection is not in the request state")
 
+    async def establish_inbound(self, connection_id: str, router_conn_id: str):
+        response = await self.admin_POST(f"/connections/{connection_id}/establish-inbound/{router_conn_id}")
+        return response
 
     async def remove_connection(self, connection_id):
         response = await self.admin_POST(f"/connections/{connection_id}")
         return response
-
-
 
     async def check_connection_ready(self, connection_id, state):
         stored = False
