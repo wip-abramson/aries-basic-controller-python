@@ -43,11 +43,11 @@ class AriesAgentController:
             self.messaging = MessagingController(self.admin_url, self.client_session)
         self.proc = None
         if issuer:
-            self.schemas = SchemaController(self.admin_url, self.client_session)
+            self.schema = SchemaController(self.admin_url, self.client_session)
             self.wallet = WalletController(self.admin_url, self.client_session)
             self.definitions = DefinitionsController(self.admin_url, self.client_session)
             self.issuer = IssuerController(self.admin_url, self.client_session, self.connections,
-                                           self.wallet, self.schemas, self.definitions)
+                                           self.wallet, self.schema, self.definitions)
 
 
     def register_listeners(self, listeners, defaults=True):

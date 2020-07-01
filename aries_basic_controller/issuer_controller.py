@@ -100,10 +100,12 @@ class IssuerController(BaseController):
 
 
     # Send Issuer a credential proposal
+    # TODO proposal body needs spliting up. See above.
     async def send_proposal(self, proposal_body):
         return await self.admin_POST(f"{self.base_url}/send-proposal", data=proposal_body)
 
     # Send holder a credential offer, independent of any proposal with preview
+    # TODO offer body needs spliting up. See above.
     async def send_offer(self, offer_body):
         return await self.admin_POST(f"{self.base_url}/send-offer", data=offer_body)
 

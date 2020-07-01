@@ -15,7 +15,7 @@ class SchemaController(BaseController):
         response = await self.admin_GET(f"{self.base_url}/{schema_id}")
         return response
 
-    async def get_created_schemas(self, schema_id=None, schema_issuer_did=None, schema_name=None, schema_version=None):
+    async def get_created_schema(self, schema_id=None, schema_issuer_did=None, schema_name=None, schema_version=None):
 
         params = {}
         if schema_id:
