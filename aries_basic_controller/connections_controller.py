@@ -11,8 +11,8 @@ from aiohttp import (
 )
 import logging
 
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger("aries_controller.connections")
 
 class ConnectionsController(BaseController):
 
