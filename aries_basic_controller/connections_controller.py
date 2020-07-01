@@ -51,9 +51,9 @@ class ConnectionsController(BaseController):
         connection = await self.admin_GET(f"/connections/{connection_id}")
         return connection
 
-    async def create_invitation(self, alias: str=None, role: str=None, auto_accept: bool=False):
+    async def create_invitation(self, alias: str = None, auto_accept: bool = None, public: bool = False, multi_use: bool = False ):
         ### TODO add in arguments
-        invite_details = await self.admin_POST("/connections/create-invitation")
+        invite_details = await self.admin_POST("/connections/create-invitation?alias=" + alias + "&accept=" + auto_accept + "&public=" + public + "&multi_use=" + multi_use)
         connection = Connection(invite_details["connection_id"], "invitation")
         self.connections.append(connection)
         return invite_details
