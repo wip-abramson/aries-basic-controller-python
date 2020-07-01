@@ -12,10 +12,16 @@ import asyncio
 from .utils import log_msg
 from .connections_controller import ConnectionsController
 from .messaging_controller import MessagingController
+from .schema_controller import SchemaController
+
+import logging
+
+logger = logging.getLogger("aries_controller")
 
 class AriesAgentController:
 
-    def __init__(self, webhook_host: str, webhook_port: int, admin_url: str, webhook_base: str = "", connections: bool=True, messaging: bool=True):
+    def __init__(self, webhook_host: str, webhook_port: int, admin_url: str, webhook_base: str = "",
+                 connections: bool = True, messaging: bool = True, schemas: bool = True):
 
         self.webhook_site = None
         self.admin_url = admin_url
@@ -32,6 +38,8 @@ class AriesAgentController:
         if messaging:
             self.messaging = MessagingController(self.admin_url, self.client_session)
         self.proc = None
+        if schemas:
+            self.schemas = SchemaController(self.admin_url, self.client_session)
 
 
     def register_listeners(self, listeners, defaults=True):
@@ -62,14 +70,12 @@ class AriesAgentController:
     async def handle_webhook(self, topic, payload):
         # log_msg(f"Hanlde {topic}")
         # log_msg(payload)
+        logging.debug(f"Handle Webhook - {topic}", payload)
         pub.sendMessage(topic, payload=payload)
         return web.Response(status=200)
 
 
     async def terminate(self):
-        # loop = asyncio.get_event_loop()
-        # if self.proc:
-        #     await loop.run_in_executor(None, self._terminate)
         await self.client_session.close()
         if self.webhook_site:
             await self.webhook_site.stop()

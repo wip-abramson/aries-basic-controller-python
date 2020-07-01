@@ -1,9 +1,8 @@
 from .base_controller import BaseController
 from aiohttp import ClientSession
 import logging
-import base64
 
-logger = logging.getLogger("messaging")
+logger = logging.getLogger("aries_controller.messaging")
 
 class MessagingController(BaseController):
 
