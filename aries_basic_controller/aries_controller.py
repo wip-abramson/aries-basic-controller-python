@@ -15,6 +15,7 @@ from .messaging_controller import MessagingController
 from .schema_controller import SchemaController
 from .wallet_controller import WalletController
 from .definitions_controller import DefinitionsController
+from .issuer_controller import IssuerController
 
 import logging
 
@@ -24,8 +25,7 @@ class AriesAgentController:
 
     ## TODO rethink how to initialise. Too many args?
     def __init__(self, webhook_host: str, webhook_port: int, admin_url: str, webhook_base: str = "",
-                 connections: bool = True, messaging: bool = True, schemas: bool = True, wallet: bool = True,
-                 definitions: bool = True):
+                 connections: bool = True, messaging: bool = True, issuer: bool = True):
 
         self.webhook_site = None
         self.admin_url = admin_url
@@ -42,12 +42,12 @@ class AriesAgentController:
         if messaging:
             self.messaging = MessagingController(self.admin_url, self.client_session)
         self.proc = None
-        if schemas:
+        if issuer:
             self.schemas = SchemaController(self.admin_url, self.client_session)
-        if wallet:
             self.wallet = WalletController(self.admin_url, self.client_session)
-        if definitions:
             self.definitions = DefinitionsController(self.admin_url, self.client_session)
+            self.issuer = IssuerController(self.admin_url, self.client_session, self.connections,
+                                           self.wallet, self.schemas, self.definitions)
 
 
     def register_listeners(self, listeners, defaults=True):
