@@ -11,8 +11,8 @@ from aiohttp import (
 )
 import logging
 
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger("aries_controller.connections")
 
 class ConnectionsController(BaseController):
 
@@ -38,7 +38,6 @@ class ConnectionsController(BaseController):
         response = await self.receive_invitation(invitation)
 
         accepted = await self.accept_invitation(response["connection_id"])
-        print("ACCEPTED CONNECTION - ", accepted)
         return accepted
 
 

@@ -33,7 +33,7 @@ usage() {
 
             Examples:
             $0 start
-            $0 start researcher-agent
+            $0 start bob-agent
 
       start - Same as up
 
@@ -62,7 +62,7 @@ EOF
 # -----------------------------------------------------------------------------------------------------------------
 # Default Settings:
 # -----------------------------------------------------------------------------------------------------------------
-DEFAULT_CONTAINERS="researcher-agent data-agent controller-example"
+DEFAULT_CONTAINERS="bob-agent alice-agent alice-notebook bob-notebook ledger-nodes ledger-browser"
 
 # -----------------------------------------------------------------------------------------------------------------
 # Functions:
@@ -112,27 +112,31 @@ configureEnvironment() {
   done
 
   # global
-  export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-om_grid}"
+  export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:controller}"
   export LEDGER_URL=${LEDGER_URL-http://$DOCKERHOST:9000}
   export WALLET_TYPE="indy"
 
-  # researcher-agent
-  export RESEARCHER_AGENT_NAME="Alice"
-  export RESEARCHER_ADMIN_PORT=8051
-  export RESEARCHER_HTTP_PORT=8050
-  export RESEARCHER_WEBHOOK_PORT=8052
-  export RESEARCHER_WEBHOOK_URL=${RESEARCHER_WEBHOOK_URL:-http://$DOCKERHOST:$RESEARCHER_WEBHOOK_PORT}
-  export RESEARCHER_AGENT_ENDPOINT=${RESEARCHER_AGENT_ENDPOINT:-http://$DOCKERHOST:$RESEARCHER_HTTP_PORT}
-  export RESEARCHER_WALLET_SEED="researcher_seed_0000000000000000"
+  # bob-agent
+  export BOB_AGENT_NAME="Bob"
+  export BOB_ADMIN_PORT=8051
+  export BOB_HTTP_PORT=8050
+  export BOB_WEBHOOK_PORT=8052
+  export BOB_WEBHOOK_URL=${BOB_WEBHOOK_URL:-http://$DOCKERHOST:$BOB_WEBHOOK_PORT}
+  export BOB_AGENT_ENDPOINT=${BOB_AGENT_ENDPOINT:-http://$DOCKERHOST:$BOB_HTTP_PORT}
+  export BOB_WALLET_SEED="bob_seed_00000000000000000000000"
+  export BOB_JUPYTER_PORT="8889"
 
-  # data-agent
-  export DATA_AGENT_NAME="Bob"
-  export DATA_ADMIN_PORT=8021
-  export DATA_HTTP_PORT=8020
-  export DATA_WEBHOOK_PORT=8022
-  export DATA_WEBHOOK_URL=${DATA_WEBHOOK_URL:-http://$DOCKERHOST:$DATA_WEBHOOK_PORT}
-  export DATA_AGENT_ENDPOINT=${DATA_AGENT_ENDPOINT:-http://$DOCKERHOST:$DATA_HTTP_PORT}
-  export DATA_WALLET_SEED="data_seed_0000000000000000000000"
+
+  # alice-agent
+  export ALICE_AGENT_NAME="Alice"
+  export ALICE_ADMIN_PORT=8021
+  export ALICE_HTTP_PORT=8020
+  export ALICE_WEBHOOK_PORT=8022
+  export ALICE_WEBHOOK_URL=${ALICE_WEBHOOK_URL:-http://$DOCKERHOST:$ALICE_WEBHOOK_PORT}
+  export ALICE_AGENT_ENDPOINT=${ALICE_AGENT_ENDPOINT:-http://$DOCKERHOST:$ALICE_HTTP_PORT}
+  export ALICE_WALLET_SEED="alice_seed_000000000000000000000"
+  export ALICE_JUPYTER_PORT="8888"
+
 
 }
 
