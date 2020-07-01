@@ -33,13 +33,13 @@ class SchemaController(BaseController):
 
     async def write_schema(self, schema_name, attributes, schema_version):
 
-        params = {
+        schema_body = {
             "schema_name": schema_name,
             "attributes": attributes,
             "schema_version": schema_version
         }
 
-        response = await self.admin_POST(f"{self.base_url}", params=params)
+        response = await self.admin_POST(f"{self.base_url}", schema_body)
         return response
 
 
