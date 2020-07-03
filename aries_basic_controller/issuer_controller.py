@@ -52,50 +52,51 @@ class IssuerController(BaseController):
     async def send_credential(self, connection_id, schema_id, cred_def_id, attributes, comment: str = "",
                               auto_remove: bool = True, trace: bool = True):
         ## TODO revist error handling
-        try:
-            response = await self.wallet.get_public_did()
-            issuer_did = response['result']['did']
-            if issuer_did is None:
-                raise Exception("Agent must have a public DID")
+        # try:
+            # response = await self.wallet.get_public_did()
+            # issuer_did = response['result']['did']
+            # if issuer_did is None:
+            #     raise Exception("Agent must have a public DID")
 
-            response = await self.connections.get_connection(connection_id)
-            if response["state"] is not "active":
-                raise Exception("Connection must be active to send a credential")
+        response = await self.connections.get_connection(connection_id)
+        if response["state"] != "active":
+            print("Connection not active")
+            raise Exception("Connection must be active to send a credential")
 
-            response = self.schema.get_by_id(schema_id)
-            schema = response["schema"]
-            schema_name = schema["schema_name"]
-            # TODO extract into utils
-            schema_issuer_id = schema_id.split(":")[0]
-            #
-            print(schema_issuer_id)
-            schema_version = schema["version"]
-            issuer_did = cred_def_id.split(":")[0]
-            print(issuer_did)
+        response = await self.schema.get_by_id(schema_id)
+        schema = response["schema"]
+        schema_name = schema["name"]
+        # TODO extract into utils
+        schema_issuer_id = schema_id.split(":")[0]
+        #
+        print("Schema issuer", schema_issuer_id)
+        schema_version = schema["version"]
+        issuer_did = cred_def_id.split(":")[0]
+        print("Cred issuer", issuer_did)
 
-            credential_body = {
-                "issuer_did": issuer_did,
-                "schema_name": schema_name,
-                "auto_remove": auto_remove,
-                "credential_proposal": {
-                    "@type": CRED_PREVIEW,
-                    "attributes": attributes
-                },
-                "connection_id": connection_id,
-                "trace": trace,
-                "comment": comment,
-                "cred_def_id": cred_def_id,
-                "schema_id": schema_id,
-                "schema_issuer_did": schema_issuer_id,
-                "schema_version": schema_version
-            }
-            return await self.admin_POST(f"{self.base_url}/send", data=credential_body)
-        except ClientResponseError:
-            logger.error("Error calling api")
-            return "ERROR"
-        except Exception:
-            logger.error("The agent does not have a public DID")
-            return "ERROR: The agent does not have a public DID"
+        credential_body = {
+            "issuer_did": issuer_did,
+            "schema_name": schema_name,
+            "auto_remove": auto_remove,
+            "credential_proposal": {
+                "@type": CRED_PREVIEW,
+                "attributes": attributes
+            },
+            "connection_id": connection_id,
+            "trace": trace,
+            "comment": comment,
+            "cred_def_id": cred_def_id,
+            "schema_id": schema_id,
+            "schema_issuer_did": schema_issuer_id,
+            "schema_version": schema_version
+        }
+        return await self.admin_POST(f"{self.base_url}/send", data=credential_body)
+        # except ClientResponseError:
+        #     logger.error("Error calling api")
+        #     return "ERROR"
+        # except Exception:
+        #     logger.error("The agent does not have a public DID")
+        #     return "ERROR: The agent does not have a public DID"
 
 
 
