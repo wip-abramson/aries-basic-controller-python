@@ -4,6 +4,7 @@ import logging
 
 logger = logging.getLogger("aries_controller.schema")
 
+
 class SchemaController(BaseController):
 
     def __init__(self, admin_url: str, client_session: ClientSession):
@@ -41,6 +42,9 @@ class SchemaController(BaseController):
 
         response = await self.admin_POST(f"{self.base_url}", schema_body)
         return response
+
+
+
 
 
 

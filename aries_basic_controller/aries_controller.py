@@ -47,7 +47,7 @@ class AriesAgentController:
             self.wallet = WalletController(self.admin_url, self.client_session)
             self.definitions = DefinitionsController(self.admin_url, self.client_session)
             self.issuer = IssuerController(self.admin_url, self.client_session, self.connections,
-                                           self.wallet, self.schema, self.definitions)
+                                           self.wallet, self.definitions)
 
 
     def register_listeners(self, listeners, defaults=True):

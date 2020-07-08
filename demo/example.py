@@ -7,120 +7,123 @@ from aries_basic_controller.aries_controller import AriesAgentController
 from dotenv import load_dotenv
 load_dotenv()
 
-RESEARCHER_ADMIN_URL = os.getenv('RESEARCHER_ADMIN_URL')
-RESEARCHER_WEBHOOK_PORT = os.getenv('RESEARCHER_WEBHOOK_PORT')
-RESEARCHER_WEBHOOK_HOST = os.getenv('RESEARCHER_WEBHOOK_HOST')
-RESEARCHER_WEBHOOK_BASE = os.getenv('RESEARCHER_WEBHOOK_BASE')
+ALICE_ADMIN_URL = os.getenv('ALICE_ADMIN_URL')
+ALICE_WEBHOOK_PORT = os.getenv('ALICE_WEBHOOK_PORT')
+ALICE_WEBHOOK_HOST = os.getenv('ALICE_WEBHOOK_HOST')
+ALICE_WEBHOOK_BASE = os.getenv('ALICE_WEBHOOK_BASE')
 
-DATA_ADMIN_URL = os.getenv('DATA_ADMIN_URL')
-DATA_WEBHOOK_PORT = os.getenv('DATA_WEBHOOK_PORT')
-DATA_WEBHOOK_HOST = os.getenv('DATA_WEBHOOK_HOST')
-DATA_WEBHOOK_BASE = os.getenv('DATA_WEBHOOK_BASE')
+BOB_ADMIN_URL = os.getenv('BOB_ADMIN_URL')
+BOB_WEBHOOK_PORT = os.getenv('BOB_WEBHOOK_PORT')
+BOB_WEBHOOK_HOST = os.getenv('BOB_WEBHOOK_HOST')
+BOB_WEBHOOK_BASE = os.getenv('BOB_WEBHOOK_BASE')
+
+
+
 
 
 async def start_agent():
 
     time.sleep(6)
 
-    data_agent_controller = AriesAgentController(webhook_host=DATA_WEBHOOK_HOST, webhook_port=DATA_WEBHOOK_PORT,
-                                               webhook_base=DATA_WEBHOOK_BASE, admin_url=DATA_ADMIN_URL, connections=True)
+    bob_agent_controller = AriesAgentController(webhook_host=BOB_WEBHOOK_HOST, webhook_port=BOB_WEBHOOK_PORT,
+                                               webhook_base=BOB_WEBHOOK_BASE, admin_url=BOB_ADMIN_URL, connections=True)
 
 
 
-    researcher_agent_controller = AriesAgentController(webhook_host=RESEARCHER_WEBHOOK_HOST, webhook_port=RESEARCHER_WEBHOOK_PORT,
-                                               webhook_base=RESEARCHER_WEBHOOK_BASE, admin_url=RESEARCHER_ADMIN_URL, connections=True)
+    alice_agent_controller = AriesAgentController(webhook_host=ALICE_WEBHOOK_HOST, webhook_port=ALICE_WEBHOOK_PORT,
+                                               webhook_base=ALICE_WEBHOOK_BASE, admin_url=ALICE_ADMIN_URL, connections=True)
 
 
-    def research_messages_hook(payload):
+    def alice_messages_hook(payload):
         connection_id = payload["connection_id"]
-        print("Handle research messages ", payload, connection_id)
+        print("Handle alice messages ", payload, connection_id)
 
-    def data_messages_hook(payload):
+    def bob_messages_hook(payload):
         connection_id = payload["connection_id"]
-        print("Handle data messages ", payload, connection_id)
+        print("Handle bob messages ", payload, connection_id)
 
 
-    data_message_listener = {
-        "handler": data_messages_hook,
+    bob_message_listener = {
+        "handler": bob_messages_hook,
         "topic": "basicmessages"
     }
 
-    research_message_listener = {
-        "handler": research_messages_hook,
+    alice_message_listener = {
+        "handler": alice_messages_hook,
         "topic": "basicmessages"
     }
 
 
-    await researcher_agent_controller.listen_webhooks()
+    await alice_agent_controller.listen_webhooks()
 
-    await data_agent_controller.listen_webhooks()
+    await bob_agent_controller.listen_webhooks()
 
 
-    data_agent_controller.register_listeners([data_message_listener], defaults=True)
-    researcher_agent_controller.register_listeners([research_message_listener], defaults=True)
+    bob_agent_controller.register_listeners([bob_message_listener], defaults=True)
+    alice_agent_controller.register_listeners([alice_message_listener], defaults=True)
 
-    invite = await data_agent_controller.connections.create_invitation(alias="Will")
+    invite = await bob_agent_controller.connections.create_invitation()
     print("Invite", invite)
 
-    data_connection_id = invite["connection_id"]
+    bob_connection_id = invite["connection_id"]
 
-    response = await researcher_agent_controller.connections.accept_connection(invite["invitation"])
+    response = await alice_agent_controller.connections.accept_connection(invite["invitation"])
     print(response)
 
 
-    print("Researcher ID", response["connection_id"])
-    researcher_id = response["connection_id"]
+    print("Alice ID", response["connection_id"])
+    alice_id = response["connection_id"]
     print("Invite Accepted")
     print(response)
 
 
-    connection = await data_agent_controller.connections.accept_request(data_connection_id)
+    connection = await bob_agent_controller.connections.accept_request(bob_connection_id)
     print("ACCEPT REQUEST")
     print(connection)
 
-    connection = await data_agent_controller.connections.get_connection(data_connection_id)
-    print("DATA AGENT CONNECTION")
+    connection = await bob_agent_controller.connections.get_connection(bob_connection_id)
+    print("BOB AGENT CONNECTION")
     print(connection)
 
     while connection["state"] != "active":
-        trust_ping = await data_agent_controller.messaging.trust_ping(data_connection_id, "hello")
-        print("TUST PING TO ACTIVATE CONNECTION - DATA -> RESEARCH")
+        trust_ping = await bob_agent_controller.messaging.trust_ping(bob_connection_id, "hello")
+        print("TUST PING TO ACTIVATE CONNECTION - BOB -> RESEARCH")
         print(trust_ping)
         time.sleep(5)
-        connection = await data_agent_controller.connections.get_connection(data_connection_id)
+        connection = await bob_agent_controller.connections.get_connection(bob_connection_id)
 
-    trust_ping = await researcher_agent_controller.messaging.trust_ping(researcher_id,"hello")
-    print("TUST PING TO ACTIVATE CONNECTION - RESEARCH -> DATA")
+    trust_ping = await alice_agent_controller.messaging.trust_ping(alice_id,"hello")
+    print("TUST PING TO ACTIVATE CONNECTION - RESEARCH -> BOB")
     print(trust_ping)
 
-    print("RESEARCHER ID {} DATA ID {}".format(researcher_id, data_connection_id))
+    print("ALICE ID {} BOB ID {}".format(alice_id, bob_connection_id))
 
-    connection = await data_agent_controller.connections.get_connection(data_connection_id)
-    print("DATA AGENT CONNECTION")
+    connection = await bob_agent_controller.connections.get_connection(bob_connection_id)
+    print("BOB AGENT CONNECTION")
     print(connection)
 
-    connection = await researcher_agent_controller.connections.get_connection(researcher_id)
+    connection = await alice_agent_controller.connections.get_connection(alice_id)
     print("RESEARCH AGENT CONNECTION")
     print(connection)
 
     #send some basic messages
-    message = await researcher_agent_controller.messaging.send_message(researcher_id,"hello from researcher world!")
-    print("BASIC MESSAGE - RESEARCH -> DATA")
+    message = await alice_agent_controller.messaging.send_message(alice_id,"hello from alice world!")
+    print("BASIC MESSAGE - RESEARCH -> BOB")
     print(message)
 
     #send some basic messages
-    message = await data_agent_controller.messaging.send_message(data_connection_id,"hello from data world!")
-    print("BASIC MESSAGE - DATA -> RESEARCH")
+    message = await bob_agent_controller.messaging.send_message(bob_connection_id,"hello from bob world!")
+    print("BASIC MESSAGE - BOB -> RESEARCH")
     print(message)
 
     print("SUCCESS")
     time.sleep(2)
-    await data_agent_controller.terminate()
-    await researcher_agent_controller.terminate()
+    await bob_agent_controller.terminate()
+    await alice_agent_controller.terminate()
 
 
 if __name__ == "__main__":
-
+    # time.sleep(60)
     try:
         asyncio.get_event_loop().run_until_complete(start_agent())
     except KeyboardInterrupt:

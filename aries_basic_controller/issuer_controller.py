@@ -1,20 +1,20 @@
 from .base_controller import BaseController
 from aiohttp import ClientSession, ClientResponseError
 import logging
-
+import json
+from.utils import extract_did, get_schema_details
 logger = logging.getLogger("aries_controller.issuer")
 
 CRED_PREVIEW = "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview"
 
 class IssuerController(BaseController):
 
-    def __init__(self, admin_url: str, client_session: ClientSession, connection_controller, wallet_controller,
-                 schema_controller, definition_controller):
+    def __init__(self, admin_url: str, client_session: ClientSession, connection_controller,
+                 wallet_controller, definition_controller):
         super().__init__(admin_url, client_session)
         self.base_url = "/issue-credential"
         self.connections = connection_controller
         self.wallet = wallet_controller
-        self.schema = schema_controller
         self.definitions = definition_controller
 
     # Fetch all credential exchange records
@@ -23,91 +23,41 @@ class IssuerController(BaseController):
         return await self.admin_GET(f"{self.base_url}/records")
 
     async def get_record_by_id(self, cred_ex_id):
-        return await self.admin_GET(f"{self.base_url}/{cred_ex_id}")
+        return await self.admin_GET(f"{self.base_url}/records/{cred_ex_id}")
 
     # Send holder a credential, automating the entire flow
-    # Need a credential body like this
-    # {
-    #     "issuer_did": "WgWxqztrNooG92RXvxSTWv",
-    #     "schema_name": "preferences",
-    #     "auto_remove": true,
-    #     "credential_proposal": {
-    #         "@type": "did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview",
-    #         "attributes": [
-    #             {
-    #                 "name": "favourite_drink",
-    #                 "mime-type": "image/jpeg",
-    #                 "value": "martini"
-    #             }
-    #         ]
-    #     },
-    #     "connection_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-    #     "trace": true,
-    #     "comment": "string",
-    #     "cred_def_id": "WgWxqztrNooG92RXvxSTWv:3:CL:20:tag",
-    #     "schema_id": "WgWxqztrNooG92RXvxSTWv:2:schema_name:1.0",
-    #     "schema_issuer_did": "WgWxqztrNooG92RXvxSTWv",
-    #     "schema_version": "1.0"
-    # }
+    # TODO trace=True causes error. Not sure why
     async def send_credential(self, connection_id, schema_id, cred_def_id, attributes, comment: str = "",
-                              auto_remove: bool = True, trace: bool = True):
-        ## TODO revist error handling
-        # try:
-            # response = await self.wallet.get_public_did()
-            # issuer_did = response['result']['did']
-            # if issuer_did is None:
-            #     raise Exception("Agent must have a public DID")
+                              auto_remove: bool = True, trace: bool = False):
 
-        response = await self.connections.get_connection(connection_id)
-        if response["state"] != "active":
-            print("Connection not active")
-            raise Exception("Connection must be active to send a credential")
-
-        response = await self.schema.get_by_id(schema_id)
-        schema = response["schema"]
-        schema_name = schema["name"]
-        # TODO extract into utils
-        schema_issuer_id = schema_id.split(":")[0]
-        #
-        print("Schema issuer", schema_issuer_id)
-        schema_version = schema["version"]
-        issuer_did = cred_def_id.split(":")[0]
-        print("Cred issuer", issuer_did)
-
-        credential_body = {
-            "issuer_did": issuer_did,
-            "schema_name": schema_name,
-            "auto_remove": auto_remove,
-            "credential_proposal": {
-                "@type": CRED_PREVIEW,
-                "attributes": attributes
-            },
-            "connection_id": connection_id,
-            "trace": trace,
-            "comment": comment,
-            "cred_def_id": cred_def_id,
-            "schema_id": schema_id,
-            "schema_issuer_did": schema_issuer_id,
-            "schema_version": schema_version
-        }
-        return await self.admin_POST(f"{self.base_url}/send", data=credential_body)
-        # except ClientResponseError:
-        #     logger.error("Error calling api")
-        #     return "ERROR"
-        # except Exception:
-        #     logger.error("The agent does not have a public DID")
-        #     return "ERROR: The agent does not have a public DID"
-
+        body = await self.create_credential_body(connection_id, schema_id, cred_def_id, attributes, comment,
+                                                 auto_remove, trace)
+        return await self.admin_POST(f"{self.base_url}/send", data=body)
 
 
     # Send Issuer a credential proposal
-    # TODO proposal body needs spliting up. See above.
-    async def send_proposal(self, proposal_body):
-        return await self.admin_POST(f"{self.base_url}/send-proposal", data=proposal_body)
+    async def send_proposal(self, connection_id, schema_id, cred_def_id, attributes, comment: str = "",
+                            auto_remove: bool = True, trace: bool = False):
 
-    # Send holder a credential offer, independent of any proposal with preview
-    # TODO offer body needs spliting up. See above.
-    async def send_offer(self, offer_body):
+        body = await self.create_credential_body(connection_id, schema_id, cred_def_id, attributes, comment,
+                                                 auto_remove, trace)
+        return await self.admin_POST(f"{self.base_url}/send-proposal", data=body)
+
+    async def send_offer(self, connection_id, cred_def_id, attributes, comment: str = "",
+                         auto_issue: bool = True, auto_remove: bool = True, trace: bool = False):
+        await self.connections.is_active(connection_id)
+        offer_body = {
+            "cred_def_id": cred_def_id,
+            "auto_remove": auto_remove,
+            "trace": trace,
+            "comment": comment,
+            "auto_issue": auto_issue,
+            "credential_preview": {
+                "@type": CRED_PREVIEW,
+                "attributes": attributes
+            },
+            "connection_id": connection_id
+        }
         return await self.admin_POST(f"{self.base_url}/send-offer", data=offer_body)
 
     # Send holder a credential offer in reference to a proposal with preview
@@ -119,12 +69,22 @@ class IssuerController(BaseController):
         return await self.admin_POST(f"{self.base_url}/records/{cred_ex_id}/send-request")
 
     # Send holder a credential
-    async def issue_credential(self, cred_ex_id):
-        return await self.admin_POST(f"{self.base_url}/records/{cred_ex_id}/issue")
+    async def issue_credential(self, cred_ex_id, comment, attributes):
+        body = {
+            "comment": comment,
+            "credential_preview": {
+                "@type": CRED_PREVIEW,
+                "attributes": attributes
+            }
+        }
+        return await self.admin_POST(f"{self.base_url}/records/{cred_ex_id}/issue", data=body)
 
     # Store a received credential
-    async def store_credential(self, cred_ex_id):
-        return await self.admin_POST(f"{self.base_url}/records/{cred_ex_id}/send")
+    async def store_credential(self, cred_ex_id, credential_id):
+        body = {
+            "credential_id": credential_id
+        }
+        return await self.admin_POST(f"{self.base_url}/records/{cred_ex_id}/store", data=body)
 
     # Revoke and issued credential
     async def revoke_credential(self, rev_reg_id, cred_rev_id, publish: bool = False):
@@ -150,3 +110,30 @@ class IssuerController(BaseController):
         }
 
         return await self.admin_POST(f"{self.base_url}/records/{cred_ex_id}/problem-report", data=body)
+
+    # Used for both send and send-proposal bodies
+    async def create_credential_body(self, connection_id, schema_id, cred_def_id, attributes, comment: str = "",
+                                     auto_remove: bool = True, trace: bool = False):
+        # raises error if connection not active
+        await self.connections.is_active(connection_id)
+
+        schema_details = get_schema_details(schema_id)
+
+        issuer_did = extract_did(cred_def_id)
+
+        body = {
+            "issuer_did": issuer_did,
+            "auto_remove": auto_remove,
+            "credential_proposal": {
+                "@type": CRED_PREVIEW,
+                "attributes": attributes
+            },
+            "connection_id": connection_id,
+            "trace": trace,
+            "comment": comment,
+            "cred_def_id": cred_def_id,
+        }
+
+        credential_body = {**body, **schema_details}
+        print(credential_body)
+        return credential_body
