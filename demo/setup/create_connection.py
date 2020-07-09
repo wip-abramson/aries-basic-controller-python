@@ -34,33 +34,13 @@ async def start_agent():
                                                webhook_base=ALICE_WEBHOOK_BASE, admin_url=ALICE_ADMIN_URL, connections=True)
 
 
-    def alice_messages_hook(payload):
-        connection_id = payload["connection_id"]
-        print("Handle alice messages ", payload, connection_id)
-
-    def bob_messages_hook(payload):
-        connection_id = payload["connection_id"]
-        print("Handle bob messages ", payload, connection_id)
-
-
-    bob_message_listener = {
-        "handler": bob_messages_hook,
-        "topic": "basicmessages"
-    }
-
-    alice_message_listener = {
-        "handler": alice_messages_hook,
-        "topic": "basicmessages"
-    }
-
-
     await alice_agent_controller.listen_webhooks()
 
     await bob_agent_controller.listen_webhooks()
 
 
-    bob_agent_controller.register_listeners([bob_message_listener], defaults=True)
-    alice_agent_controller.register_listeners([alice_message_listener], defaults=True)
+    bob_agent_controller.register_listeners([], defaults=True)
+    alice_agent_controller.register_listeners([], defaults=True)
 
     invite = await bob_agent_controller.connections.create_invitation()
     print("Invite", invite)
@@ -105,16 +85,6 @@ async def start_agent():
     connection = await alice_agent_controller.connections.get_connection(alice_id)
     print("RESEARCH AGENT CONNECTION")
     print(connection)
-
-    #send some basic messages
-    message = await alice_agent_controller.messaging.send_message(alice_id,"hello from alice world!")
-    print("BASIC MESSAGE - RESEARCH -> BOB")
-    print(message)
-
-    #send some basic messages
-    message = await bob_agent_controller.messaging.send_message(bob_connection_id,"hello from bob world!")
-    print("BASIC MESSAGE - BOB -> RESEARCH")
-    print(message)
 
     print("SUCCESS")
     time.sleep(2)

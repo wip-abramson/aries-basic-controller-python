@@ -60,10 +60,10 @@ services:
         --genesis-url '${LEDGER_URL}/genesis'
         --label ${ALICE_AGENT_NAME}",
     ]
-  testing:
+  setup:
     build:
       context: .
-      dockerfile: Dockerfile.test
+      dockerfile: Dockerfile.setup
     networks:
       - indy_demo
     depends_on:
@@ -84,7 +84,7 @@ services:
       [
         "-c",
         "sleep 80;
-        python ./example.py"
+        python ./create_connection.py"
       ]
   alice-notebook:
     build:
@@ -97,7 +97,6 @@ services:
       - indy_demo
     volumes:
       - ./demo/alice:/workspace
-      - ${PWD}/aries_basic_controller:/workspace/aries_basic_controller
     ports:
       - "8888:8888"
       - ${ALICE_WEBHOOK_PORT}:${ALICE_WEBHOOK_PORT}
@@ -112,8 +111,6 @@ services:
       - indy_demo
     volumes:
       - ${PWD}/demo/bob:/workspace
-      - ${PWD}/aries_basic_controller:/workspace/aries_basic_controller
-
     ports:
       - "8889:8888"
       - ${BOB_WEBHOOK_PORT}:${BOB_WEBHOOK_PORT}
