@@ -62,7 +62,7 @@ EOF
 # -----------------------------------------------------------------------------------------------------------------
 # Default Settings:
 # -----------------------------------------------------------------------------------------------------------------
-DEFAULT_CONTAINERS="bob-agent alice-agent alice-notebook bob-notebook ledger-nodes ledger-browser"
+DEFAULT_CONTAINERS="bob-agent alice-agent setup ledger-nodes ledger-browser alice-notebook bob-notebook"
 
 # -----------------------------------------------------------------------------------------------------------------
 # Functions:
@@ -241,7 +241,7 @@ functionExists() {
 }
 # =================================================================================================================
 
-pushd ${SCRIPT_HOME} >/dev/null
+pushd "${SCRIPT_HOME}" >/dev/null
 COMMAND=$(toLower ${1})
 shift || COMMAND=usage
 

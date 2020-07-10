@@ -12,12 +12,17 @@ ADD aries_basic_controller aries_basic_controller
 ADD requirements.txt .
 ADD setup.py .
 ADD README.md .
-
-
+#
+#
 RUN pip install --no-cache-dir -e .
+#RUN pip install -r requirements.txt
 
+#RUN pip install aiohttp
+#RUN export PYTHONPATH="$PYTHONPATH:/aries_basic_controller"
+#ENV PYTHONPATH "${PYTHONPATH}:/aries_basic_controller"
+#RUN export JUPYTER_PATH="$JUPYTER_PATH:/aries_basic_controller"
 # Create jupyter notebook workspace
-RUN mkdir $WORKSPACE
+#RUN mkdir $WORKSPACE
 WORKDIR $WORKSPACE
 
 # Make the image start the jupyer notebook

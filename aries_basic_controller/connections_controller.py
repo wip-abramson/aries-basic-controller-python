@@ -10,6 +10,7 @@ from aiohttp import (
     ClientTimeout,
 )
 import logging
+import asyncio
 
 
 logger = logging.getLogger("aries_controller.connections")
@@ -33,7 +34,7 @@ class ConnectionsController(BaseController):
                 connection.update_state(state)
                 logger.debug(f"{connection_id} state updated")
 
-    ## Combines receive and accept connection api calls
+    # Combines receive and accept connection api calls
     async def accept_connection(self, invitation):
         response = await self.receive_invitation(invitation)
 
@@ -117,7 +118,7 @@ class ConnectionsController(BaseController):
             response = await self.admin_POST(f"/connections/{connection_id}/accept-request",params = params)
             return response
         else:
-            ## TODO create proper error classes
+            # TODO create proper error classes
             raise Exception("The connection is not in the request state")
 
     async def establish_inbound(self, connection_id: str, router_conn_id: str):
@@ -132,14 +133,26 @@ class ConnectionsController(BaseController):
         stored = False
         for connection in self.connections:
             if connection.id == connection_id:
-                await connection.detect_state_ready(state)
-                return True
+                try:
+                    await asyncio.wait_for(connection.detect_state_ready(state), 5)
+                    return True
+                except asyncio.TimeoutError:
+                    response = await self.get_connection(connection_id)
+                    return state == response["state"]
         if not stored:
             try:
-                response = self.get_connection(connection_id)
+                response = await self.get_connection(connection_id)
                 connection = Connection(response["connection_id"], response["state"])
-                await connection.detect_state_ready(state)
+                self.connections.append(connection)
+                await asyncio.wait_for(connection.detect_state_ready(state), 5)
                 return True
-            except Exception:
+            except asyncio.TimeoutError:
                 return False
 
+
+    async def is_active(self, connection_id):
+        is_active = await self.check_connection_ready(connection_id, 'active')
+        if not is_active:
+            logger.error(f"Connection {connection_id} not active")
+            raise Exception("Connection must be active to send a credential")
+        return
